@@ -9,8 +9,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -33,7 +35,7 @@ public class ProductionSchedule {
     
     public DatabaseObject dbo = new DatabaseObject(address, userName, password);
         
-    public Job csvToJob(File f, int i) throws FileNotFoundException, IOException, ParseException{
+    public Job csvToJob(File f, int i) throws FileNotFoundException, IOException, ParseException, ClassNotFoundException, SQLException{
         CSVReader reader = new CSVReader(new FileReader(f));
         CSVReader namer = reader;
         namer.readNext();
@@ -51,7 +53,7 @@ public class ProductionSchedule {
         }
         return j;
     }
-    public static ArrayList importToDB(Job j) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException{
+    public static ArrayList exportHandler(Job j) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException{
         String insertQuery = "INSERT INTO `dlaub25_lasersched`.`jobs` "
                 + "(`jobNum`, `client`, `jobName`, `status`, `programmer`, `id`) "
                 + "VALUES (?, ?, ?, ?, ?, ?);";
@@ -73,8 +75,18 @@ public class ProductionSchedule {
         //End crazy ass code
         
     }
-    public static void test(){
-        String s = "Test";
-        UI.errorWindow(s);
+    ////////////////////////////////////////////////////////////////////////////
+//    public static ArrayList importHandler(int index, DatabaseOutputObject dbo){
+//        
+//    }
+    ////////////////////////////////////////////////////////////////////////////
+    public static void test() throws ClassNotFoundException, SQLException{
+        DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched","dlaub25_fmi","admin");
+        String query = "SELECT * FROM `main` WHERE `id` = 7691";
+        DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
+        int columnCount = dboo.metaData.getColumnCount();
+        for (int i = 1; i < columnCount; i++) {
+            System.out.println(dboo.metaData.getColumnClassName(columnCount));
+        }
     }
 }

@@ -9,6 +9,7 @@ import java.awt.Frame;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DragSource;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.TooManyListenersException;
 import java.util.Vector;
@@ -24,7 +25,7 @@ import javax.swing.TransferHandler;
 import javax.swing.table.DefaultTableModel;
 import productionschedule.Package;
 import productionschedule.Job;
-
+import productionschedule.ProductionSchedule;
 
 
 /**
@@ -37,7 +38,7 @@ public class UI extends javax.swing.JFrame {
     private JTable table;
     
     
-    public static Job j = new Job(1, "A", "B", "C", "D", "E", 2);
+    //public static Job j = new Job(1, "A", "B", "C", "D", "E", 2);
 
     /**
      * Creates new form UI
@@ -232,21 +233,27 @@ public class UI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        try {
-            ProductionSchedule.importToDB(j);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchFieldException ex) {
-            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//        try {
+//            ProductionSchedule.exportHandler(j);
+//        } catch (ClassNotFoundException ex) {
+//            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (NoSuchFieldException ex) {
+//            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (IllegalArgumentException ex) {
+//            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (IllegalAccessException ex) {
+//            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+//        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void testButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testButtonActionPerformed
-        ProductionSchedule.test();
+        try {
+            ProductionSchedule.test();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_testButtonActionPerformed
 
     /**

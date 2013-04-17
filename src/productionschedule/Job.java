@@ -3,7 +3,10 @@
  * and open the template in the editor.
  */
 package productionschedule;
+import java.sql.SQLException;
 import productionschedule.Package;
+import productionschedule.DatabaseTools;
+import productionschedule.DatabaseObject;
 
 /**
  *
@@ -18,14 +21,26 @@ public class Job {
     public String programmer;
     public int id;
     
-    Job(int n, String c, String j, String s, String pro, String pri, int i) { 
+    Job(int n, String c, String j, String s, String pro, String pri, int i) throws ClassNotFoundException, SQLException { 
         jobNum = n;
         clientName = c;
         jobName = j;
         status = s;
         programmer = pro;
         id = i;
-
+        packages = buildPackageArray();
+    }
+    private Package[] buildPackageArray() throws ClassNotFoundException, SQLException {
+        DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched","dlaub25_fmi","admin");
+        String query = "SELECT * FROM `packages` WHERE `id` = " + this.id;
+        DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
+        while (dboo.resultSet.next()){
+            int numberOfColumns = dboo.metaData.getColumnCount();
+            for (int i = 0; i < numberOfColumns; i++) {
+                dboo.metaData.getColumnClassName(jobNum).toString();
+            }
+        }
+        return null;
     }
     public void setClient(String s){
         clientName = s;

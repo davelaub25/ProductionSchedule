@@ -23,7 +23,7 @@ public class DatabaseTools {
 
 
     ////////////////////////////////////////////////////////////////////////////
-    public DatabaseOutputObject queryDatabase (DatabaseObject dbo, String query) throws ClassNotFoundException, SQLException{
+    public static DatabaseOutputObject queryDatabase (DatabaseObject dbo, String query) throws ClassNotFoundException, SQLException{
         Class.forName("com.mysql.jdbc.Driver"); 
         Connection connection = DriverManager.getConnection(dbo.address, dbo.userName, dbo.password);
         ResultSet rs = connection.createStatement().executeQuery(query);
