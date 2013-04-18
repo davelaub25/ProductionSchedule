@@ -82,11 +82,15 @@ public class ProductionSchedule {
     ////////////////////////////////////////////////////////////////////////////
     public static void test() throws ClassNotFoundException, SQLException{
         DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched","dlaub25_fmi","admin");
-        String query = "SELECT * FROM `main` WHERE `id` = 7691";
+        String query = "SELECT * FROM main WHERE id = 7746";
         DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
         int columnCount = dboo.metaData.getColumnCount();
-        for (int i = 1; i < columnCount; i++) {
-            System.out.println(dboo.metaData.getColumnClassName(columnCount));
+        dboo.resultSet.first();
+        for (int i = 1; i <= columnCount; i++) {
+            //dboo.resultSet.next();
+            //System.out.println();
+            System.out.println(dboo.metaData.getColumnClassName(i));
         }
+        
     }
 }

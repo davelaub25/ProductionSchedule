@@ -36,8 +36,9 @@ public class Job {
         DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
         while (dboo.resultSet.next()){
             int numberOfColumns = dboo.metaData.getColumnCount();
-            for (int i = 0; i < numberOfColumns; i++) {
+            for (int i = 1; i <= numberOfColumns; i++) {
                 dboo.metaData.getColumnClassName(jobNum).toString();
+                
             }
         }
         return null;
