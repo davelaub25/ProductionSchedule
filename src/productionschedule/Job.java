@@ -4,6 +4,7 @@
  */
 package productionschedule;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import productionschedule.Package;
 import productionschedule.DatabaseTools;
 import productionschedule.DatabaseObject;
@@ -16,7 +17,7 @@ public class Job {
     public int jobNum;
     public String clientName;
     public String jobName;
-    public Package[] packages;
+    public ArrayList packages;
     public String status;
     public String programmer;
     public int id;
@@ -30,18 +31,20 @@ public class Job {
         id = i;
         packages = buildPackageArray();
     }
-    private Package[] buildPackageArray() throws ClassNotFoundException, SQLException {
+    private ArrayList buildPackageArray() throws ClassNotFoundException, SQLException {
         DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched","dlaub25_fmi","admin");
         String query = "SELECT * FROM `packages` WHERE `id` = " + this.id;
         DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
+        ArrayList packages = null;
         while (dboo.resultSet.next()){
             int numberOfColumns = dboo.metaData.getColumnCount();
-            for (int i = 1; i <= numberOfColumns; i++) {
-                dboo.metaData.getColumnClassName(jobNum).toString();
-                
-            }
+            Package pack = new Package(dboo.resultSet.getString("name"), 
+                    dboo.resultSet.getDate("date"), dboo.resultSet.getString("status"), 
+                    dboo.resultSet.getInt("size"), dboo.resultSet.getInt("nUp"), 
+                    dboo.resultSet.getDouble("ert"));
+            packages.add(pack);
         }
-        return null;
+        return packages;
     }
     public void setClient(String s){
         clientName = s;

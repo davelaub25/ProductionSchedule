@@ -29,7 +29,7 @@ public class DatabaseTools {
         ResultSet rs = connection.createStatement().executeQuery(query);
         ResultSetMetaData md = rs.getMetaData();
         DatabaseOutputObject queryResults = new DatabaseOutputObject(rs, md);
-        connection.close();
+        //connection.close();
         return queryResults;
     }
     ////////////////////////////////////////////////////////////////////////////
