@@ -62,9 +62,12 @@ public class Job {
         id = i;
     }
     public void addPackage(Package p){
-        int newSize = packages.length + 1;
-        Package[] copy = null;
-        System.arraycopy(packages, 0, copy, 0, newSize);
-        packages = copy;
+        packages.add(p);
     }
+//    public void addPackage(Package p){
+//        int newSize = packages.length + 1;
+//        Package[] copy = null;
+//        System.arraycopy(packages, 0, copy, 0, newSize);
+//        packages = copy;
+//    }
 }
