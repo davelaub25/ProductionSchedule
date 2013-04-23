@@ -4,6 +4,7 @@
  */
 package productionschedule;
 
+
 import au.com.bytecode.opencsv.CSVReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -88,6 +89,7 @@ public class ProductionSchedule {
                     String[] fieldName = names.split("\\.");    // Splits the object name string on periods
                     String lastName = fieldName[fieldName.length-1];    // Pulls the position of the string which contains the property name
                     propValues.add(i);
+                    
                 }
             }
             
@@ -99,11 +101,11 @@ public class ProductionSchedule {
         String query = "SELECT * FROM main WHERE id = 7746";
         DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
         int columnCount = dboo.metaData.getColumnCount();
-        dboo.resultSet.first();
+        dboo.rowSet.first();
         for (int i = 1; i <= columnCount; i++) {
             //dboo.resultSet.next();
             //System.out.println();
-            System.out.println(dboo.metaData.getColumnClassName(i));
+            System.out.println(dboo.rowSet.getMetaData().getColumnClassName(i));
         }
         
     }

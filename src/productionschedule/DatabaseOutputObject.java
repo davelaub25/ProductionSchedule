@@ -6,6 +6,7 @@ package productionschedule;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import javax.sql.rowset.CachedRowSet;
 
 /**
  *
@@ -13,9 +14,10 @@ import java.sql.ResultSetMetaData;
  */
     public class DatabaseOutputObject {
         public ResultSet resultSet; // The result set
+        public CachedRowSet rowSet;
         public ResultSetMetaData metaData; // The metadata
-        public DatabaseOutputObject(ResultSet r, ResultSetMetaData m) { // Constructor
-            resultSet = r;
+        public DatabaseOutputObject(CachedRowSet r, ResultSetMetaData m) { // Constructor
+            rowSet = r;
             metaData = m;
         }
     }

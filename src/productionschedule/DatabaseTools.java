@@ -5,10 +5,12 @@
 package productionschedule;
 
 import com.mysql.jdbc.exceptions.MySQLSyntaxErrorException;
+import com.sun.rowset.CachedRowSetImpl;
 import com.sun.xml.internal.ws.util.StringUtils;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import javax.sql.rowset.CachedRowSet;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import productionschedule.DatabaseObject;
@@ -28,8 +30,10 @@ public class DatabaseTools {
         Connection connection = DriverManager.getConnection(dbo.address, dbo.userName, dbo.password);
         ResultSet rs = connection.createStatement().executeQuery(query);
         ResultSetMetaData md = rs.getMetaData();
-        DatabaseOutputObject queryResults = new DatabaseOutputObject(rs, md);
-        //connection.close();
+        CachedRowSet rowSet = new CachedRowSetImpl();
+        rowSet.populate(rs);
+        DatabaseOutputObject queryResults = new DatabaseOutputObject(rowSet, md);
+        connection.close();
         return queryResults;
     }
     ////////////////////////////////////////////////////////////////////////////
