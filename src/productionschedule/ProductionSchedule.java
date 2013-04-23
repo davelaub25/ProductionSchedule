@@ -76,9 +76,23 @@ public class ProductionSchedule {
         
     }
     ////////////////////////////////////////////////////////////////////////////
-//    public static ArrayList importHandler(int index, DatabaseOutputObject dbo){
-//        
-//    }
+    public static ArrayList importHandler(int index, DatabaseOutputObject exDBOO) throws ClassNotFoundException, SQLException{
+        while (exDBOO.resultSet.next()) {            
+            int numberOfColumns = exDBOO.metaData.getColumnCount();
+            Class cls = Class.forName("productionschedule.Job");
+            Field fieldlist[] = cls.getDeclaredFields();
+            ArrayList propValues = new ArrayList();
+            for (int i = 0; i < fieldlist.length; i++) {
+                if (!fieldlist[i].toString().equals("public productionschedule.Package[] productionschedule.Job.packages")){
+                    String names = fieldlist[i].toString();
+                    String[] fieldName = names.split("\\.");    // Splits the object name string on periods
+                    String lastName = fieldName[fieldName.length-1];    // Pulls the position of the string which contains the property name
+                    propValues.add(                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           );
+                }
+            }
+            
+        }
+    }
     ////////////////////////////////////////////////////////////////////////////
     public static void test() throws ClassNotFoundException, SQLException{
         DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched","dlaub25_fmi","admin");

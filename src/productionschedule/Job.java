@@ -15,7 +15,7 @@ import productionschedule.DatabaseObject;
  */
 public class Job {
     public int jobNum;
-    public String clientName;
+    public String client;
     public String jobName;
     public ArrayList packages;
     public String status;
@@ -24,7 +24,7 @@ public class Job {
     
     Job(int n, String c, String j, String s, String pro, String pri, int i) throws ClassNotFoundException, SQLException { 
         jobNum = n;
-        clientName = c;
+        client = c;
         jobName = j;
         status = s;
         programmer = pro;
@@ -35,19 +35,19 @@ public class Job {
         DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched","dlaub25_fmi","admin");
         String query = "SELECT * FROM `packages` WHERE `id` = " + this.id;
         DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
-        ArrayList packages = null;
+        ArrayList packagesOut = null;
         while (dboo.resultSet.next()){
             int numberOfColumns = dboo.metaData.getColumnCount();
             Package pack = new Package(dboo.resultSet.getString("name"), 
                     dboo.resultSet.getDate("date"), dboo.resultSet.getString("status"), 
                     dboo.resultSet.getInt("size"), dboo.resultSet.getInt("nUp"), 
                     dboo.resultSet.getDouble("ert"));
-            packages.add(pack);
+            packagesOut.add(pack);
         }
-        return packages;
+        return packagesOut;
     }
     public void setClient(String s){
-        clientName = s;
+        client = s;
     }
     public void setName(String s){
         jobName = s;
