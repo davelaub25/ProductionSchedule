@@ -87,7 +87,7 @@ public class ProductionSchedule {
                     String names = fieldlist[i].toString();
                     String[] fieldName = names.split("\\.");    // Splits the object name string on periods
                     String lastName = fieldName[fieldName.length-1];    // Pulls the position of the string which contains the property name
-                    propValues.add(                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           );
+                    propValues.add(i);
                 }
             }
             
