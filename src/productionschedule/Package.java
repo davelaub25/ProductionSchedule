@@ -12,14 +12,14 @@ import java.util.Date;
  * @author dlaub
  */
 public class Package{
-    private String name;
-    private Date mailDate;
-    private String status;
-    private int size;
-    private int pages;
-    private int nUp;
-    private String printer;
-    private Double ert;
+    public String name;
+    public Date mailDate;
+    public String status;
+    public int size;
+    public int pages;
+    public int nUp;
+    public String printer;
+    public Double ert;
     public Package(String n, Date m, String st, int si, int u, Double e){
         name = n;
         mailDate = m;

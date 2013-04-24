@@ -248,10 +248,12 @@ public class UI extends javax.swing.JFrame {
 
     private void testButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testButtonActionPerformed
         try {
-            ProductionSchedule.test();
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
+            try {
+                ProductionSchedule.test();
+            } catch (    IllegalArgumentException | IllegalAccessException ex) {
+                Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } catch (ClassNotFoundException | SQLException ex) {
             Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_testButtonActionPerformed
