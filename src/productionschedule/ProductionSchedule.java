@@ -79,8 +79,8 @@ public class ProductionSchedule {
         
     }
     ////////////////////////////////////////////////////////////////////////////
-    public static ArrayList importHandler(int index, DatabaseOutputObject exDBOO) throws ClassNotFoundException, SQLException{
-        ArrayList propValues = new ArrayList();
+    public static ArrayList importHandler(DatabaseOutputObject exDBOO) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException{
+        ArrayList jobs = new ArrayList();
         while (exDBOO.rowSet.next()) {            
             int numberOfColumns = exDBOO.rowSet.getMetaData().getColumnCount();
             Class cls = Class.forName("productionschedule.Job");
@@ -92,10 +92,10 @@ public class ProductionSchedule {
                     map.put(fieldName, exDBOO.rowSet.getObject(fieldName));
                 }
             }
-            
-            propValues.add(map);
+            Job j = new Job(map);
+            jobs.add(j);
         }
-        return propValues;
+        return jobs;
     }
     ////////////////////////////////////////////////////////////////////////////
     public static void test() throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException{
@@ -103,29 +103,14 @@ public class ProductionSchedule {
         String query = "SELECT * FROM jobs";
         DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
         int columnCount = dboo.rowSet.getMetaData().getColumnCount();
-        while (dboo.rowSet.next()) {            
-            int numberOfColumns = dboo.rowSet.getMetaData().getColumnCount();
-            Class cls = Class.forName("productionschedule.Job");
-            Field fieldlist[] = cls.getDeclaredFields();
-            ArrayList propValues = new ArrayList();
-            Map<String,Object> map = new HashMap<String, Object>();
-            Job j = new Job(query, query, query, query, query, query, 1);
-            for (int i = 0; i < fieldlist.length; i++) {
-                if (!fieldlist[i].getName().equals("packages")){
-                    String fieldName = fieldlist[i].getName();
-                    map.put(fieldName, dboo.rowSet.getObject(fieldName));
-                    fieldlist[i].set(j, map.get(fieldlist[i].getName()));
-                    
-                }
-            }
-//            System.out.println(j.client);
-//            System.out.println(j.id);
-//            System.out.println(j.jobName);
-//            System.out.println(j.jobNum);
-//            System.out.println(j.programmer);
-//            System.out.println(j.status);
-            System.out.println(j.packages.get(1).getClass().toString());
-            
+        ArrayList jobs = importHandler(dboo);
+        for (int i = 0; i < jobs.size(); i++) {
+            Job j = (Job) jobs.get(i);
+            System.out.println(j.client);
+            System.out.println(j.id);
+            System.out.println(j.jobName);
+            System.out.println(j.programmer);
+            System.out.println(j.status);
         }
         
     }

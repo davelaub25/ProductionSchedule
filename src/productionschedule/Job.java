@@ -47,7 +47,7 @@ public class Job {
         DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched","dlaub25_fmi","admin");
         String query = "SELECT * FROM `packages` WHERE `id` = " + this.id;
         DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
-        ArrayList packagesOut = null;
+        ArrayList packagesOut = new ArrayList();
         while (dboo.rowSet.next()){
             int numberOfColumns = dboo.rowSet.getMetaData().getColumnCount();
             Package pack = new Package(dboo.rowSet.getString("name"), 
