@@ -23,10 +23,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.TransferHandler;
 import javax.swing.table.DefaultTableModel;
-import productionschedule.Package;
-import productionschedule.Job;
-import productionschedule.ProductionSchedule;
-
+import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 
 /**
  *
@@ -389,5 +386,91 @@ public class UI extends javax.swing.JFrame {
     public static void errorWindow(String errorMessage){
         Frame f = new Frame();
         JOptionPane.showMessageDialog(f, errorMessage);
+    }
+    private abstract class Node extends AbstractMutableTreeTableNode {
+
+        public Node(Object[] data) {
+            super(data);
+            if (data == null) {
+                throw new IllegalArgumentException("Node data cannot be null");
+            }
+        }
+
+        public abstract String getJob();
+
+        /*
+        * Inherited
+        */
+        @Override
+        public int getColumnCount() {
+            return getData().length;
+        }
+
+        /*
+        * Inherited
+        */
+        @Override
+        public Object getValueAt(int column) {
+            return getData()[column];
+        }
+
+        public Object[] getData() {
+            return (Object[]) getUserObject();
+        }
+
+    }
+    
+    private class RootNode extends Node {
+
+        public RootNode(String key) {
+            super(new Object[] {key});
+        }
+
+        public String getJob() {
+            return "";
+        }
+    }
+    private class JobNode extends Node {
+
+        public JobNode(Object[] data) {
+            super(data);
+        }
+
+        public String getJob() {
+            return (String) getData()[0];
+        }
+
+        public boolean isJob(String job) {
+            return getJob().equals(job);
+        }
+
+    }
+    private class PersonNode extends Node {
+
+        public PersonNode(Object[] data) {
+            super(data);
+        }
+
+        public String getJob() {
+            return ((Node) getParent()).getJob();
+        }
+
+        public String getPerson() {
+            return getJob() + (String) getData()[1];
+        }
+
+        public boolean isPerson(String person) {
+            return getPerson().equals(person);
+        }
+
+        @Override
+        public Object getValueAt(int column) {
+        // null for family name and post code
+        if (column == 0 || column == 2) {
+            return null;
+        }
+        return getData()[column];
+        }
+
     }
 }
