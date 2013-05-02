@@ -40,10 +40,11 @@ public class Job {
                 fieldlist[i].set(this, properties.get(fieldlist[i].getName()));
             }
         }
-        jobNum = jobNum.getClass().getName();
+        //jobNum = jobNum.getClass().getName();
         packages = buildPackageArray();
     }
     private ArrayList buildPackageArray() throws ClassNotFoundException, SQLException {
+        System.out.println("BuildPackageArray started");
         DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched","dlaub25_fmi","admin");
         String query = "SELECT * FROM `packages` WHERE `id` = " + this.id;
         DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
@@ -56,6 +57,7 @@ public class Job {
                     dboo.rowSet.getDouble("ert"));
             packagesOut.add(pack);
         }
+        System.out.println("BuildPackageArrayFinished");
         return packagesOut;
     }
     public void setClient(String s){

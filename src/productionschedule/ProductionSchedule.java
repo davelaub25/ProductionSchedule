@@ -20,7 +20,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import javax.swing.JTable;
+import javax.swing.table.AbstractTableModel;
 import productionschedule.Package;
 import productionschedule.Job;
 import productionschedule.DatabaseObject;
@@ -89,6 +92,7 @@ public class ProductionSchedule {
             for (int i = 0; i < fieldlist.length; i++) {
                 if (!fieldlist[i].getName().equals("packages")){
                     String fieldName = fieldlist[i].getName();
+                    System.out.println(exDBOO.rowSet.getObject(fieldName));
                     map.put(fieldName, exDBOO.rowSet.getObject(fieldName));
                 }
             }
@@ -106,6 +110,7 @@ public class ProductionSchedule {
         ArrayList jobs = importHandler(dboo);
         for (int i = 0; i < jobs.size(); i++) {
             Job j = (Job) jobs.get(i);
+            System.out.println(j.jobNum);
             System.out.println(j.client);
             System.out.println(j.id);
             System.out.println(j.jobName);
@@ -114,4 +119,13 @@ public class ProductionSchedule {
         }
         
     }
+    ////////////////////////////////////////////////////////////////////////////
+//    public static JTable buildJobTable(ArrayList jobs){
+//        for (int curJob = 0; curJob < jobs.size(); curJob++) {
+//            JTable table = new JTable;
+//            
+//        }
+//    }
+    ////////////////////////////////////////////////////////////////////////////
+    
 }

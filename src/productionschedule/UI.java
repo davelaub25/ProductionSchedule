@@ -4,8 +4,11 @@
  */
 package productionschedule;
 
+import java.awt.ComponentOrientation;
 import java.awt.Cursor;
 import java.awt.Frame;
+import java.awt.GridLayout;
+import java.awt.LayoutManager;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DragSource;
@@ -20,10 +23,13 @@ import javax.activation.DataHandler;
 import javax.swing.DropMode;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.TransferHandler;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
+import static productionschedule.ProductionSchedule.importHandler;
 
 /**
  *
@@ -40,7 +46,7 @@ public class UI extends javax.swing.JFrame {
     /**
      * Creates new form UI
      */
-    public UI() throws TooManyListenersException {
+    public UI() throws TooManyListenersException, ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException {
         initComponents();
         DefaultTableModel poolModel = new DefaultTableModel(
             new Object [][] {
@@ -52,12 +58,25 @@ public class UI extends javax.swing.JFrame {
                 }
                 
             );
-        JTable jobPool = new JTable(poolModel);
+        
+        
+        DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched","dlaub25_fmi","admin");
+        String query = "SELECT * FROM jobs";
+        DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
+        int columnCount = dboo.rowSet.getMetaData().getColumnCount();
+        ArrayList jobs = importHandler(dboo);
+        
+        JobTableModel jtm = new JobTableModel(jobs);
+        Job j = (Job) jobs.get(0);
+        ArrayList packList = j.packages;
+        JobTableModel ptm = new JobTableModel(packList);
+        
+        JTable jobPool = new JTable(jtm);
         TransferHandler handler = new TableRowTransferHandler();
         jobPool.setDragEnabled(true);
         jobPool.setDropMode(DropMode.INSERT_ROWS);
         jobPool.setTransferHandler(handler);
-        jScrollPane1.setViewportView(jobPool);
+        //jScrollPane1.setViewportView(jobPool);
         DefaultTableModel bonnieModel = new DefaultTableModel(
             new Object [][] {
                 {"2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "2"},{"1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1"}
@@ -68,10 +87,21 @@ public class UI extends javax.swing.JFrame {
                 }
                 
             );
-        JTable bonniePool = new JTable(bonnieModel);
+        JTable bonniePool = new JTable(ptm);
         bonniePool.setDragEnabled(true);
         bonniePool.setDropMode(DropMode.INSERT_ROWS);
-        jScrollPane4.setViewportView(bonniePool);
+        JPanel panel = new JPanel();
+        JTableHeader header1 = jobPool.getTableHeader();
+        JTableHeader header2 = bonniePool.getTableHeader();
+        panel.setLayout(new GridLayout(10,1));
+        LayoutManager lm = panel.getLayout();
+        panel.add(header1);
+        header1.setSize(10, 20);
+        panel.add(jobPool);
+        panel.add(header2);
+        panel.add(bonniePool);
+        bonniePane.setViewportView(panel);
+        //jScrollPane4.setViewportView(bonniePool);
         bonniePool.setTransferHandler(handler);
 //        DropTarget dt = new DropTarget();
 //        DropTargetListener dtl = null;
@@ -90,22 +120,36 @@ public class UI extends javax.swing.JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jScrollPane4 = new javax.swing.JScrollPane();
-        jScrollPane5 = new javax.swing.JScrollPane();
-        jScrollPane6 = new javax.swing.JScrollPane();
+        pkgPoolPane = new javax.swing.JScrollPane();
+        jobPoolPane = new javax.swing.JScrollPane();
+        bonniePane = new javax.swing.JScrollPane();
+        clydePane = new javax.swing.JScrollPane();
+        ocePane = new javax.swing.JScrollPane();
+        jSeparator1 = new javax.swing.JSeparator();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         jPanel3 = new javax.swing.JPanel();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        jTextPane1 = new javax.swing.JTextPane();
         jButton1 = new javax.swing.JButton();
         testButton = new javax.swing.JButton();
+        jSlider1 = new javax.swing.JSlider();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        pkgPoolPane.setPreferredSize(new java.awt.Dimension(100, 200));
+
+        jobPoolPane.setToolTipText("");
+        jobPoolPane.setPreferredSize(new java.awt.Dimension(100, 200));
+
+        bonniePane.setPreferredSize(new java.awt.Dimension(100, 200));
+
+        clydePane.setPreferredSize(new java.awt.Dimension(100, 200));
+
+        ocePane.setPreferredSize(new java.awt.Dimension(100, 200));
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -114,51 +158,47 @@ public class UI extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator1)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 1215, Short.MAX_VALUE)
-                            .addComponent(jScrollPane1))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 1215, Short.MAX_VALUE)
-                    .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 1215, Short.MAX_VALUE))
+                        .addComponent(jobPoolPane, javax.swing.GroupLayout.PREFERRED_SIZE, 483, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(pkgPoolPane, javax.swing.GroupLayout.DEFAULT_SIZE, 908, Short.MAX_VALUE))
+                    .addComponent(clydePane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(ocePane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(bonniePane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 174, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jobPoolPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(pkgPoolPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 199, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(bonniePane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(clydePane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(ocePane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 72, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("tab1", jPanel1);
 
         jPanel3.setMinimumSize(new java.awt.Dimension(50, 1200));
 
-        jTextPane1.setEditable(false);
-        jScrollPane3.setViewportView(jTextPane1);
-
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGap(22, 22, 22)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 768, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(41, Short.MAX_VALUE))
+            .addGap(0, 1325, Short.MAX_VALUE)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGap(28, 28, 28)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(996, Short.MAX_VALUE))
+            .addGap(0, 1272, Short.MAX_VALUE)
         );
 
         jScrollPane2.setViewportView(jPanel3);
@@ -177,6 +217,11 @@ public class UI extends javax.swing.JFrame {
             }
         });
 
+        jLabel1.setText(String.valueOf(jSlider1.getValue()));
+
+        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, jSlider1, org.jdesktop.beansbinding.ELProperty.create("${value}"), jLabel1, org.jdesktop.beansbinding.BeanProperty.create("text"));
+        bindingGroup.addBinding(binding);
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -184,26 +229,38 @@ public class UI extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(24, 24, 24)
-                        .addComponent(jButton1))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(88, 88, 88)
-                        .addComponent(testButton)))
-                .addGap(234, 234, 234)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 850, Short.MAX_VALUE)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addGap(24, 24, 24)
+                                .addComponent(jButton1))
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addGap(88, 88, 88)
+                                .addComponent(testButton)))
+                        .addGap(191, 191, 191))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, 304, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(142, 142, 142)))
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 1079, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 789, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 887, Short.MAX_VALUE)
                 .addContainerGap())
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(44, 44, 44)
                 .addComponent(jButton1)
                 .addGap(271, 271, 271)
                 .addComponent(testButton)
+                .addGap(87, 87, 87)
+                .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -222,9 +279,10 @@ public class UI extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTabbedPane1)
-                .addContainerGap())
+                .addComponent(jTabbedPane1))
         );
+
+        bindingGroup.bind();
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -244,6 +302,7 @@ public class UI extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void testButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testButtonActionPerformed
+        
         try {
             try {
                 ProductionSchedule.test();
@@ -289,48 +348,61 @@ public class UI extends javax.swing.JFrame {
                     new UI().setVisible(true);
                 } catch (TooManyListenersException ex) {
                     Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SQLException ex) {
+                    Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalArgumentException ex) {
+                    Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
             
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JScrollPane bonniePane;
+    private javax.swing.JScrollPane clydePane;
     private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JScrollPane jScrollPane4;
-    private javax.swing.JScrollPane jScrollPane5;
-    private javax.swing.JScrollPane jScrollPane6;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSlider jSlider1;
     private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JTextPane jTextPane1;
+    private javax.swing.JScrollPane jobPoolPane;
+    private javax.swing.JScrollPane ocePane;
+    private javax.swing.JScrollPane pkgPoolPane;
     private javax.swing.JButton testButton;
+    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
     class TableRowTransferHandler extends TransferHandler {
-      private int[] rows    = null;
-      private int addIndex  = -1; //Location where items were added
-      private int addCount  = 0;  //Number of items added.
-      private final DataFlavor localObjectFlavor;
-      private Object[] transferedObjects = null;
-      private JComponent source = null;
-      public TableRowTransferHandler() {
-        localObjectFlavor = new ActivationDataFlavor(
+      
+        private int[] rows    = null;
+        private int addIndex  = -1; //Location where items were added
+        private int addCount  = 0;  //Number of items added.
+        private final DataFlavor localObjectFlavor;
+        private Object[] transferedObjects = null;
+        private JComponent source = null;
+      
+        public TableRowTransferHandler() {
+          localObjectFlavor = new ActivationDataFlavor(
           Object[].class, DataFlavor.javaJVMLocalObjectMimeType, "Array of items");
-      }
-      @Override protected Transferable createTransferable(JComponent c) {
-        source = c;
-        JTable table = (JTable) c;
-        DefaultTableModel model = (DefaultTableModel)table.getModel();
-        ArrayList<Object> list = new ArrayList<Object>();
-        for(int i: rows = table.getSelectedRows())
-          list.add(model.getDataVector().elementAt(i));
-        transferedObjects = list.toArray();
-        return new DataHandler(transferedObjects,localObjectFlavor.getMimeType());
-      }
+        }
+        @Override protected Transferable createTransferable(JComponent c) {
+          source = c;
+          JTable table = (JTable) c;
+          JobTableModel model = (JobTableModel)table.getModel();
+          ArrayList<Object> list = new ArrayList<Object>();
+          for(int i: rows = table.getSelectedRows())
+            list.add(model.getDataVector().elementAt(i));
+          transferedObjects = list.toArray();
+          return new DataHandler(transferedObjects,localObjectFlavor.getMimeType());
+        }
       @Override public boolean canImport(TransferSupport info) {
         JTable t = (JTable)info.getComponent();
         boolean b = info.isDrop()&&info.isDataFlavorSupported(localObjectFlavor);
@@ -344,7 +416,7 @@ public class UI extends javax.swing.JFrame {
       @Override public boolean importData(TransferSupport info) {
         JTable target = (JTable)info.getComponent();
         JTable.DropLocation dl = (JTable.DropLocation)info.getDropLocation();
-        DefaultTableModel model = (DefaultTableModel)target.getModel();
+        JobTableModel model = (JobTableModel)target.getModel();
         int index = dl.getRow();
         int max = model.getRowCount();
         if(index<0 || index>max) index = max;
@@ -419,7 +491,6 @@ public class UI extends javax.swing.JFrame {
         }
 
     }
-    
     private class RootNode extends Node {
 
         public RootNode(String key) {
