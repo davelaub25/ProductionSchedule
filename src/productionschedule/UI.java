@@ -35,6 +35,7 @@ import javax.swing.table.JTableHeader;
 import javax.swing.text.Element;
 import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import static productionschedule.ProductionSchedule.importHandler;
+import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
 
 /**
  *
@@ -346,15 +347,7 @@ public class UI extends javax.swing.JFrame {
             public void run() {
                 try {
                     new UI().setVisible(true);
-                } catch (TooManyListenersException ex) {
-                    Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (ClassNotFoundException ex) {
-                    Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (SQLException ex) {
-                    Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalArgumentException ex) {
-                    Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalAccessException ex) {
+                } catch (        TooManyListenersException | ClassNotFoundException | SQLException | IllegalArgumentException | IllegalAccessException ex) {
                     Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }

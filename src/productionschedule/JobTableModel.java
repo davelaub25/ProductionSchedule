@@ -16,7 +16,7 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author dlaub
  */
-class JobTableModel extends DefaultTableModel {
+class JobTableModel extends AbstractTableModel {
         private ArrayList datalist = new ArrayList();
         protected Vector    dataVector;
         protected Vector    columnIdentifiers;
@@ -61,8 +61,17 @@ class JobTableModel extends DefaultTableModel {
         }
         ////////////////////////////////////////////////////////////////////////
         public Object getValueAt(int row, int col) {
-            Object job = (Object) datalist.get(row);
-            Field[] fieldList = job.getClass().getDeclaredFields();
+            Object job;
+            if("Vector".equals(datalist.get(row).getClass().getSimpleName())){
+                job = (Object) datalist.get(row);
+                Vector vec = (Vector)job;
+                job = (Object)vec.get(0);
+            }
+            else{
+                job = (Object) datalist.get(row);
+            }
+            
+            Field[] fieldList = job.getClass().getFields();
             if(stop){
                 try {
                 return fieldList[col].get(job);
