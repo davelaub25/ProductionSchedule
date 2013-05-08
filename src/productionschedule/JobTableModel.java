@@ -62,29 +62,35 @@ class JobTableModel extends AbstractTableModel {
         ////////////////////////////////////////////////////////////////////////
         public Object getValueAt(int row, int col) {
             Object job;
-            if("Vector".equals(datalist.get(row).getClass().getSimpleName())){
+//            if(){
+//                
+//            }
+            Vector v = new Vector();
+            v.add(stop);
+            if(datalist.get(row).getClass().getSimpleName() == "Vector"){
+                v = (Vector)datalist.get(row);
+            }
+            if("Vector".equals(datalist.get(row).getClass().getSimpleName()) && v.get(0).getClass().getSimpleName() == "Vector"){
                 job = (Object) datalist.get(row);
                 Vector vec = (Vector)job;
                 job = (Object)vec.get(0);
+                System.out.println("");
+            }
+            else if("Vector".equals(datalist.get(row).getClass().getSimpleName())){
+                job = (Object) datalist.get(row);
+                Vector vec = (Vector)job;
+                job = (Object)vec.get(0);
+                System.out.println("");
             }
             else{
                 job = (Object) datalist.get(row);
             }
             
             Field[] fieldList = job.getClass().getFields();
-            if(stop){
-                try {
+            try {
                 return fieldList[col].get(job);
             } catch (    IllegalArgumentException | IllegalAccessException ex) {
                 Logger.getLogger(JobTableModel.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            }
-            else{
-                try {
-                    return fieldList[col].get(job);
-                } catch (    IllegalArgumentException | IllegalAccessException ex) {
-                    Logger.getLogger(JobTableModel.class.getName()).log(Level.SEVERE, null, ex);
-                }
             }
             return null;
         }
@@ -93,11 +99,11 @@ class JobTableModel extends AbstractTableModel {
             return false;
         }
         ////////////////////////////////////////////////////////////////////////
-        public void insertRow(int row, Vector rowData) {
+        public void insertRow(int row, Object rowData) {
             
             dataVector.insertElementAt(rowData, row);
             datalist.add(row, rowData);
-            justifyRows(row, row+1);
+            //justifyRows(row, row+1);
             fireTableRowsInserted(row, row);
         }
         ////////////////////////////////////////////////////////////////////////
@@ -171,6 +177,7 @@ class JobTableModel extends AbstractTableModel {
     }
     public void removeRow(int row) {
         dataVector.removeElementAt(row);
+        datalist.remove(row);
         fireTableRowsDeleted(row, row);
     }
 }

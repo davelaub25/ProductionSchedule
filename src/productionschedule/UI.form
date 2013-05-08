@@ -176,10 +176,6 @@
                               <Component id="jSlider1" min="-2" pref="304" max="-2" attributes="0"/>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
                           </Group>
-                          <Group type="102" alignment="1" attributes="0">
-                              <Component id="jLabel1" min="-2" pref="35" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="142" max="-2" attributes="0"/>
-                          </Group>
                       </Group>
                       <Component id="jScrollPane2" pref="1079" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -200,8 +196,6 @@
                       <Component id="testButton" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="87" max="-2" attributes="0"/>
                       <Component id="jSlider1" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jLabel1" min="-2" pref="33" max="-2" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
@@ -251,14 +245,6 @@
               </Events>
             </Component>
             <Component class="javax.swing.JSlider" name="jSlider1">
-              <AuxValues>
-                <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="jLabel1.setText(String.valueOf(jSlider1.getValue()));"/>
-              </AuxValues>
-            </Component>
-            <Component class="javax.swing.JLabel" name="jLabel1">
-              <BindingProperties>
-                <BindingProperty name="text" source="jSlider1" sourcePath="${value}" target="jLabel1" targetPath="text" updateStrategy="0" immediately="false"/>
-              </BindingProperties>
             </Component>
           </SubComponents>
         </Container>
