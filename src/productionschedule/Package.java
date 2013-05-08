@@ -4,7 +4,10 @@
  */
 package productionschedule;
 
+import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.util.Date;
+import java.util.Map;
 
 
 /**
@@ -30,10 +33,19 @@ public class Package{
         pages = numberOfPages();
         printer = "None";
     }
+    ////////////////////////////////////////////////////////////////////////////
+    Package(Map properties) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException { 
+        Field fieldlist[] = this.getClass().getDeclaredFields();
+        for (int i = 0; i < fieldlist.length; i++) {
+            fieldlist[i].set(this, properties.get(fieldlist[i].getName()));
+        }
+    }
+    ////////////////////////////////////////////////////////////////////////////
     public int numberOfPages(){
         int pageCount = size/nUp;
         return pageCount;
     }
+    ////////////////////////////////////////////////////////////////////////////
     public void setDate(Date d){
         mailDate = d;
     }

@@ -6,6 +6,7 @@ package productionschedule;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import productionschedule.Package;
 import productionschedule.DatabaseTools;
@@ -24,7 +25,7 @@ public class Job {
     public String programmer;
     public int id;
     
-    Job(String n, String c, String j, String s, String pro, String pri, int i) throws ClassNotFoundException, SQLException { 
+    Job(String n, String c, String j, String s, String pro, String pri, int i) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException { 
         jobNum = n;
         client = c;
         jobName = j;
@@ -43,20 +44,25 @@ public class Job {
         //jobNum = jobNum.getClass().getName();
         packages = buildPackageArray();
     }
-    private ArrayList buildPackageArray() throws ClassNotFoundException, SQLException {
+    private ArrayList buildPackageArray() throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException {
         System.out.println("BuildPackageArray started");
         DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched","dlaub25_fmi","admin");
         String query = "SELECT * FROM `packages` WHERE `id` = " + this.id;
         DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
         ArrayList packagesOut = new ArrayList();
+        Class cls = Class.forName("productionschedule.Package");
+        Field fieldlist[] = cls.getDeclaredFields();
+        Map<String,Object> map = new HashMap<String, Object>();
+        
         while (dboo.rowSet.next()){
-            int numberOfColumns = dboo.rowSet.getMetaData().getColumnCount();
-            Package pack = new Package(dboo.rowSet.getString("name"), 
-                    dboo.rowSet.getDate("mailDate"), dboo.rowSet.getString("status"), 
-                    dboo.rowSet.getInt("size"), dboo.rowSet.getInt("nUp"), 
-                    dboo.rowSet.getDouble("ert"));
-            packagesOut.add(pack);
+            for (int i = 0; i < fieldlist.length; i++) {
+                String fieldName = fieldlist[i].getName();
+                map.put(fieldName, dboo.rowSet.getObject(fieldName));
+            }
+            Package p = new Package(map);
+            packagesOut.add(p);
         }
+        
         System.out.println("BuildPackageArrayFinished");
         return packagesOut;
     }
