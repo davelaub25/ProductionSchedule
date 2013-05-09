@@ -10,9 +10,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 import java.text.DateFormat;
@@ -20,13 +18,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import javax.swing.JTable;
-import javax.swing.table.AbstractTableModel;
-import productionschedule.Package;
-import productionschedule.Job;
-import productionschedule.DatabaseObject;
 
 /**
  *
@@ -41,7 +33,7 @@ public class ProductionSchedule {
     
     public DatabaseObject dbo = new DatabaseObject(address, userName, password);
         
-    public Job csvToJob(File f, int i) throws FileNotFoundException, IOException, ParseException, ClassNotFoundException, SQLException{
+    public Job csvToJob(File f, int i) throws FileNotFoundException, IOException, ParseException, ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException{
         CSVReader reader = new CSVReader(new FileReader(f));
         CSVReader namer = reader;
         namer.readNext();

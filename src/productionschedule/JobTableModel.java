@@ -48,7 +48,12 @@ class JobTableModel extends AbstractTableModel {
         }
         ////////////////////////////////////////////////////////////////////////
         public Class getColumnClass(int c) {
-            return getValueAt(0, c).getClass();
+            try{
+                return getValueAt(0, c).getClass();
+            }catch(NullPointerException e){
+                System.out.println("INFO: Column class of type null found.  Defaulting to String class.\n");
+                return String.class;
+            }
         }
         ////////////////////////////////////////////////////////////////////////
         public int getRowCount() {
@@ -62,9 +67,6 @@ class JobTableModel extends AbstractTableModel {
         ////////////////////////////////////////////////////////////////////////
         public Object getValueAt(int row, int col) {
             Object job;
-//            if(){
-//                
-//            }
             Vector v = new Vector();
             v.add(stop);
             if(datalist.get(row).getClass().getSimpleName() == "Vector"){
