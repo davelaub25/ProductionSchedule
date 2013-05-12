@@ -6,15 +6,9 @@ package productionschedule;
 
 import com.mysql.jdbc.exceptions.MySQLSyntaxErrorException;
 import com.sun.rowset.CachedRowSetImpl;
-import com.sun.xml.internal.ws.util.StringUtils;
 import java.sql.*;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import javax.sql.rowset.CachedRowSet;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
-import productionschedule.DatabaseObject;
-import productionschedule.DatabaseOutputObject;
 
 /**
  *

@@ -11,6 +11,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 import java.text.DateFormat;
@@ -18,6 +21,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,12 +35,15 @@ public class ProductionSchedule {
     public static final String password = "admin";
     
     
-    public DatabaseObject dbo = new DatabaseObject(address, userName, password);
+    public static DatabaseObject dbo = new DatabaseObject(address, userName, password);
         
-    public Job csvToJob(File f, int i) throws FileNotFoundException, IOException, ParseException, ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException{
+    public static Job csvToJob(File f, int i) throws FileNotFoundException, IOException, ParseException, ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException{
         CSVReader reader = new CSVReader(new FileReader(f));
         CSVReader namer = reader;
         namer.readNext();
+        String insertQuery = "INSERT INTO `dlaub25_lasersched`.`jobs` "
+        + "(`jobNum`, `client`, `jobName`, `status`, `programmer`, `id`) "
+        + "VALUES (?, ?, ?, ?, ?, ?);";
         String [] nameLine = namer.readNext();
         String [] nextLine;
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
@@ -49,8 +56,35 @@ public class ProductionSchedule {
                     Integer.parseInt(nextLine[4]), Integer.parseInt(nextLine[5]), Double.parseDouble(nextLine[6]));
             j.addPackage(p);
         }
+        
         return j;
     }
+    ////////////////////////////////////////////////////////////////////////////
+    public static void csvToJob(File f) throws FileNotFoundException, IOException, ClassNotFoundException{
+        CSVReader reader = new CSVReader(new FileReader(f));
+        List<String[]> jobValues = reader.readAll();
+        for (int i = 0; i < jobValues.size(); i++) {
+            System.out.println(jobValues.get(i)[0]);
+        }
+        Class cls = Class.forName("productionschedule.Job");
+        Field fieldlist[] = cls.getDeclaredFields();
+        Map<String,Object> map = new HashMap<String, Object>();
+        for (int i = 0; i < fieldlist.length; i++) {
+            if (!fieldlist[i].getName().equals("packages")){//Skipping package field as it is built in the job constructor
+                String fieldName = fieldlist[i].getName();
+                map.put(fieldName, exDBOO.rowSet.getObject(fieldName));
+            }
+        }
+        
+        jobNum = n;
+        client = c;
+        jobName = j;
+        status = s;
+        programmer = pro;
+        id = i;
+        packages = buildPackageArray();
+    }
+    ////////////////////////////////////////////////////////////////////////////
     public static ArrayList exportHandler(Job j) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException{
         String insertQuery = "INSERT INTO `dlaub25_lasersched`.`jobs` "
                 + "(`jobNum`, `client`, `jobName`, `status`, `programmer`, `id`) "
@@ -94,22 +128,9 @@ public class ProductionSchedule {
         return jobs;
     }
     ////////////////////////////////////////////////////////////////////////////
-    public static void test() throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException{
-        DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched","dlaub25_fmi","admin");
-        String query = "SELECT * FROM jobs";
-        DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
-        int columnCount = dboo.rowSet.getMetaData().getColumnCount();
-        ArrayList jobs = importHandler(dboo);
-        for (int i = 0; i < jobs.size(); i++) {
-            Job j = (Job) jobs.get(i);
-            System.out.println(j.jobNum);
-            System.out.println(j.client);
-            System.out.println(j.id);
-            System.out.println(j.jobName);
-            System.out.println(j.programmer);
-            System.out.println(j.status);
-        }
-        
+    public static void test() throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException, FileNotFoundException, IOException{
+        File f = new File("C:\\LASER\\csv Reports\\65268 Laser Production Count Sheet.csv");
+        csvToJob(f);
     }
     ////////////////////////////////////////////////////////////////////////////
 //    public static JTable buildJobTable(ArrayList jobs){

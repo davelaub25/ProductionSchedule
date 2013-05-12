@@ -8,9 +8,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import productionschedule.Package;
-import productionschedule.DatabaseTools;
-import productionschedule.DatabaseObject;
 
 /**
  *
@@ -40,6 +37,7 @@ public class Job {
             if (!fieldlist[i].getName().equals("packages")){
                 fieldlist[i].set(this, properties.get(fieldlist[i].getName()));
             }
+            
         }
         //jobNum = jobNum.getClass().getName();
         packages = buildPackageArray();
