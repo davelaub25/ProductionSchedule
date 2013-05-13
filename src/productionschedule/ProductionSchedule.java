@@ -63,26 +63,30 @@ public class ProductionSchedule {
     public static void csvToJob(File f) throws FileNotFoundException, IOException, ClassNotFoundException{
         CSVReader reader = new CSVReader(new FileReader(f));
         List<String[]> jobValues = reader.readAll();
-        for (int i = 0; i < jobValues.size(); i++) {
-            System.out.println(jobValues.get(i)[0]);
-        }
-        Class cls = Class.forName("productionschedule.Job");
-        Field fieldlist[] = cls.getDeclaredFields();
-        Map<String,Object> map = new HashMap<String, Object>();
-        for (int i = 0; i < fieldlist.length; i++) {
-            if (!fieldlist[i].getName().equals("packages")){//Skipping package field as it is built in the job constructor
-                String fieldName = fieldlist[i].getName();
-                map.put(fieldName, exDBOO.rowSet.getObject(fieldName));
+        ArrayList packageValues;
+        ArrayList 
+        for (int column = 0; column < jobValues.get(0).length; column++) {
+            if(column > 2){
+                break;
             }
+            
         }
         
-        jobNum = n;
-        client = c;
-        jobName = j;
-        status = s;
-        programmer = pro;
-        id = i;
-        packages = buildPackageArray();
+        for(String[] record : jobValues){
+            for (int column = 0; column < record.length; column++) {
+                if(column > 2){
+                    break;
+                }
+                
+            }
+        }
+//        jobNum = n;
+//        client = c;
+//        jobName = j;
+//        status = s;
+//        programmer = pro;
+//        id = i;
+//        packages = buildPackageArray();
     }
     ////////////////////////////////////////////////////////////////////////////
     public static ArrayList exportHandler(Job j) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException{

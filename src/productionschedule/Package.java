@@ -15,14 +15,14 @@ import java.util.Map;
  * @author dlaub
  */
 public class Package{
-    public String name;
-    public Date mailDate;
+    public String name;   // Contained in CSV
+    public Date mailDate; // Contained in CSV
     public String status;
-    public int size;
+    public int size;      // Contained in CSV
     public int pages;
-    public int nUp;
+    public int nUp;       // Contained in CSV
     public String printer;
-    public Double ert;
+    public Double ert;    // Contained in CSV
     public Package(String n, Date m, String st, int si, int u, Double e){
         name = n;
         mailDate = m;
@@ -34,6 +34,15 @@ public class Package{
         printer = "None";
     }
     ////////////////////////////////////////////////////////////////////////////
+    Package(Map properties, boolean csvSourced) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException { 
+        Field fieldlist[] = this.getClass().getDeclaredFields();
+        for (int i = 0; i < fieldlist.length; i++) {
+            fieldlist[i].set(this, properties.get(fieldlist[i].getName()));
+        }
+        status = "inQueue";
+        pages = numberOfPages();
+        printer = "none";
+    }
     Package(Map properties) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException { 
         Field fieldlist[] = this.getClass().getDeclaredFields();
         for (int i = 0; i < fieldlist.length; i++) {
@@ -42,8 +51,9 @@ public class Package{
     }
     ////////////////////////////////////////////////////////////////////////////
     public int numberOfPages(){
-        int pageCount = size/nUp;
-        return pageCount;
+        double pageCount = size/nUp;
+        pageCount = Math.ceil(pageCount);
+        return (int)pageCount;
     }
     ////////////////////////////////////////////////////////////////////////////
     public void setDate(Date d){

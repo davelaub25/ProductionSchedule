@@ -14,11 +14,11 @@ import java.util.Map;
  * @author dlaub
  */
 public class Job {
-    public String jobNum;
-    public String client;
-    public String jobName;
+    public String jobNum;       //Contained in csv
+    public String client;       //Contained in csv
+    public String jobName;      //Contained in csv
     public ArrayList packages;
-    public String status;
+    public String status;       
     public String programmer;
     public int id;
     
@@ -29,6 +29,16 @@ public class Job {
         status = s;
         programmer = pro;
         id = i;
+        packages = buildPackageArray();
+    }
+    Job(Map properties, boolean  csvSourced) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException { 
+        Field fieldlist[] = this.getClass().getDeclaredFields();
+        for (int i = 0; i < fieldlist.length; i++) {
+            if (!fieldlist[i].getName().equals("packages")){
+                fieldlist[i].set(this, properties.get(fieldlist[i].getName()));
+            }
+        }
+        
         packages = buildPackageArray();
     }
     Job(Map properties) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException { 
