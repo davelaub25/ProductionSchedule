@@ -4,6 +4,7 @@
  */
 package productionschedule;
 
+import com.mysql.jdbc.exceptions.MySQLDataException;
 import com.mysql.jdbc.exceptions.MySQLSyntaxErrorException;
 import com.sun.rowset.CachedRowSetImpl;
 import java.sql.*;
@@ -16,6 +17,9 @@ import javax.sql.rowset.CachedRowSet;
  */
 public class DatabaseTools {
     
+    public static final int sqlDate = 91;
+    public static final int sqlInt = 4;
+    public static final int sqlString = 12;
 
 
     ////////////////////////////////////////////////////////////////////////////
@@ -60,14 +64,56 @@ public class DatabaseTools {
                     int objectType = 0;
                     switch (values.get(i-1).getClass().getName()) {
                         case "java.lang.String":
-                            objectType = 12;
+                            objectType = sqlString;
                             break;
                         case "java.util.Date":
-                            objectType = 91;
+                            objectType = sqlDate;
                             break;
                         case "int":
-                            objectType = 4;
+                            objectType = sqlInt;
                             break;
+                        default:
+                            throw new MySQLDataException("Object is not a valid sql class");
+                    }
+                    if(values.get(i-1) == null){
+                        preparedStmtUpdate.setNull(i, objectType);
+                    }
+                    else{
+                        preparedStmtUpdate.setObject(i, values.get(i-1), objectType);
+                    }
+                }
+                preparedStmtUpdate.executeUpdate();
+            }
+        } 
+        else{
+            throw new MySQLSyntaxErrorException("Statements must begin with \"UPDATE\" or \"INSERT\"!");
+        }
+        connection.close();        
+    }
+    ////////////////////////////////////////////////////////////////////////////
+    public void multiUpdateDatabase (DatabaseObject dbo, String query, ArrayList values) throws ClassNotFoundException, SQLException{
+        Class.forName("com.mysql.jdbc.Driver"); 
+        Connection connection = DriverManager.getConnection(dbo.address, dbo.userName, dbo.password);
+        if(query.toUpperCase().startsWith("UPDATE") || query.toUpperCase().contains("INSERT")){
+            PreparedStatement preparedStmtUpdate = connection.prepareStatement(query);
+            if(countCharOccurances(query, '?') != values.size()){
+                UI.errorWindow("Prepared statement marker count mismatch.");
+            }
+            else{
+                for (int i = 1; i < values.size(); i++) {
+                    int objectType = 0;
+                    switch (values.get(i-1).getClass().getName()) {
+                        case "java.lang.String":
+                            objectType = sqlString;
+                            break;
+                        case "java.util.Date":
+                            objectType = sqlDate;
+                            break;
+                        case "int":
+                            objectType = sqlInt;
+                            break;
+                        default:
+                            throw new MySQLDataException("Object is not a valid sql class");
                     }
                     if(values.get(i-1) == null){
                         preparedStmtUpdate.setNull(i, objectType);
