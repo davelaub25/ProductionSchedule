@@ -15,7 +15,7 @@ import java.util.Map;
  * @author dlaub
  */
 public class Package{
-    public String name;   // Contained in CSV
+    public String pkgName;   // Contained in CSV
     public Date mailDate; // Contained in CSV
     public String status;
     public int size;      // Contained in CSV
@@ -24,7 +24,7 @@ public class Package{
     public String printer;
     public Double ert;    // Contained in CSV
     public Package(String n, Date m, String st, int si, int u, Double e){
-        name = n;
+        pkgName = n;
         mailDate = m;
         status = st;
         size = si;

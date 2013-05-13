@@ -20,6 +20,7 @@ public class DatabaseTools {
     public static final int sqlDate = 91;
     public static final int sqlInt = 4;
     public static final int sqlString = 12;
+    public static final int sqlDouble = 8;
 
 
     ////////////////////////////////////////////////////////////////////////////
@@ -51,7 +52,7 @@ public class DatabaseTools {
         
     }
     ////////////////////////////////////////////////////////////////////////////
-    public void updateDatabase (DatabaseObject dbo, String query, ArrayList values) throws ClassNotFoundException, SQLException{
+    public void int updateDatabase (DatabaseObject dbo, String query, ArrayList values) throws ClassNotFoundException, SQLException{
         Class.forName("com.mysql.jdbc.Driver"); 
         Connection connection = DriverManager.getConnection(dbo.address, dbo.userName, dbo.password);
         if(query.toUpperCase().startsWith("UPDATE") || query.toUpperCase().contains("INSERT")){
@@ -72,6 +73,9 @@ public class DatabaseTools {
                         case "int":
                             objectType = sqlInt;
                             break;
+                        case "double":
+                                objectType = sqlDouble;
+                                break;
                         default:
                             throw new MySQLDataException("Object is not a valid sql class");
                     }
@@ -81,48 +85,57 @@ public class DatabaseTools {
                     else{
                         preparedStmtUpdate.setObject(i, values.get(i-1), objectType);
                     }
+                    ResultSet rs = connection.createStatement().executeQuery("SELECT `id` FROM `jobs` WHERE ORDER BY `id` DESC LIMIT 1;");
                 }
                 preparedStmtUpdate.executeUpdate();
             }
+            
         } 
         else{
             throw new MySQLSyntaxErrorException("Statements must begin with \"UPDATE\" or \"INSERT\"!");
         }
-        connection.close();        
+        connection.close();
     }
     ////////////////////////////////////////////////////////////////////////////
     public void multiUpdateDatabase (DatabaseObject dbo, String query, ArrayList values) throws ClassNotFoundException, SQLException{
         Class.forName("com.mysql.jdbc.Driver"); 
         Connection connection = DriverManager.getConnection(dbo.address, dbo.userName, dbo.password);
-        if(query.toUpperCase().startsWith("UPDATE") || query.toUpperCase().contains("INSERT")){
-            PreparedStatement preparedStmtUpdate = connection.prepareStatement(query);
-            if(countCharOccurances(query, '?') != values.size()){
-                UI.errorWindow("Prepared statement marker count mismatch.");
-            }
+        if(query.toUpperCase().startsWith("UPDATE") || query.toUpperCase().contains("INSERT")){     //Checking integrity of query and values
+            PreparedStatement preparedStmtUpdate = connection.prepareStatement(query);              //
+            ArrayList queryCount = (ArrayList) values.get(0);                                       //
+            if(countCharOccurances(query, '?') != queryCount.size()){                               //
+                UI.errorWindow("Prepared statement marker count mismatch.");                        //
+            }                                                                                       //
             else{
-                for (int i = 1; i < values.size(); i++) {
-                    int objectType = 0;
-                    switch (values.get(i-1).getClass().getName()) {
-                        case "java.lang.String":
-                            objectType = sqlString;
-                            break;
-                        case "java.util.Date":
-                            objectType = sqlDate;
-                            break;
-                        case "int":
-                            objectType = sqlInt;
-                            break;
-                        default:
-                            throw new MySQLDataException("Object is not a valid sql class");
+                for (int record = 0; record < values.size(); record++) {
+                    ArrayList recordValues = (ArrayList) values.get(record);
+                    for (int column = 1; column < recordValues.size(); column++) {
+                        int objectType = 0;
+                        switch (recordValues.get(column-1).getClass().getName()) {
+                            case "java.lang.String":
+                                objectType = sqlString;
+                                break;
+                            case "java.util.Date":
+                                objectType = sqlDate;
+                                break;
+                            case "int":
+                                objectType = sqlInt;
+                                break;
+                            case "double":
+                                objectType = sqlDouble;
+                                break;
+                            default:
+                                throw new MySQLDataException("Object is not a valid sql class");
+                        }
+                        if(recordValues.get(column-1) == null){
+                            preparedStmtUpdate.setNull(column, objectType);
+                        }
+                        else{
+                            preparedStmtUpdate.setObject(column, recordValues.get(column-1), objectType);
+                        }
                     }
-                    if(values.get(i-1) == null){
-                        preparedStmtUpdate.setNull(i, objectType);
-                    }
-                    else{
-                        preparedStmtUpdate.setObject(i, values.get(i-1), objectType);
-                    }
+                    preparedStmtUpdate.executeUpdate();
                 }
-                preparedStmtUpdate.executeUpdate();
             }
         }
         else{

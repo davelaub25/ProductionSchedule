@@ -11,9 +11,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 import java.text.DateFormat;
@@ -23,6 +20,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.csvreader.CsvReader;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import javax.swing.text.html.Option;
 
 /**
  *
@@ -34,59 +35,80 @@ public class ProductionSchedule {
     public static final String userName = "dlaub25_fmi";
     public static final String password = "admin";
     
+    public static final int lastJobFieldIndex = 2;
+    public static final int firstPkgFieldIndex = lastJobFieldIndex + 1;
+    public static final String csvCol0 = "String";
+    public static final String csvCol1 = "String";
+    public static final String csvCol2 = "String";
+    public static final String csvCol3 = "String";
+    public static final String csvCol4 = "int";
+    public static final String csvCol5 = "int";
+    public static final String csvCol6 = "double";
+    public static final String csvCol7 = "Date";
     
     public static DatabaseObject dbo = new DatabaseObject(address, userName, password);
         
-    public static Job csvToJob(File f, int i) throws FileNotFoundException, IOException, ParseException, ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException{
-        CSVReader reader = new CSVReader(new FileReader(f));
-        CSVReader namer = reader;
-        namer.readNext();
-        String insertQuery = "INSERT INTO `dlaub25_lasersched`.`jobs` "
-        + "(`jobNum`, `client`, `jobName`, `status`, `programmer`, `id`) "
-        + "VALUES (?, ?, ?, ?, ?, ?);";
-        String [] nameLine = namer.readNext();
-        String [] nextLine;
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        Job j = new Job(nameLine[0], nameLine[1], nameLine[2],
-                "Queued", java.nio.file.Files.getOwner(f.toPath()).toString(), "", i);
-        reader.readNext(); //Skips the header row
-        while ((nextLine = reader.readNext()) != null) {
-            Date d = null;
-            Package p = new Package(nextLine[3], df.parse(nextLine[7]), "Queued",
-                    Integer.parseInt(nextLine[4]), Integer.parseInt(nextLine[5]), Double.parseDouble(nextLine[6]));
-            j.addPackage(p);
-        }
-        
-        return j;
-    }
+//    public static Job csvToJob(File f, int i) throws FileNotFoundException, IOException, ParseException, ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException{
+//        CsvReader reader = new CsvReader(new FileReader(f));
+//        CsvReader namer = reader;
+//        namer.readNext();
+//        String insertQuery = "INSERT INTO `dlaub25_lasersched`.`jobs` "
+//        + "(`jobNum`, `client`, `jobName`, `status`, `programmer`, `id`) "
+//        + "VALUES (?, ?, ?, ?, ?, ?);";
+//        String [] nameLine = namer.readNext();
+//        String [] nextLine;
+//        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+//        Job j = new Job(nameLine[0], nameLine[1], nameLine[2],
+//                "Queued", java.nio.file.Files.getOwner(f.toPath()).toString(), "", i);
+//        reader.readNext(); //Skips the header row
+//        while ((nextLine = reader.readNext()) != null) {
+//            Date d = null;
+//            Package p = new Package(nextLine[3], df.parse(nextLine[7]), "Queued",
+//                    Integer.parseInt(nextLine[4]), Integer.parseInt(nextLine[5]), Double.parseDouble(nextLine[6]));
+//            j.addPackage(p);
+//        }
+//        
+//        return j;
+//    }
     ////////////////////////////////////////////////////////////////////////////
-    public static void csvToJob(File f) throws FileNotFoundException, IOException, ClassNotFoundException{
-        CSVReader reader = new CSVReader(new FileReader(f));
-        List<String[]> jobValues = reader.readAll();
-        ArrayList packageValues;
-        ArrayList 
-        for (int column = 0; column < jobValues.get(0).length; column++) {
-            if(column > 2){
-                break;
-            }
-            
+    public static void csvToJob(File f) throws FileNotFoundException, IOException, ClassNotFoundException, ParseException{
+        CsvReader reader = new CsvReader(new FileReader(f));
+        reader.readHeaders();
+        reader.readRecord();
+        String programmer = Files.getOwner(f.toPath(), LinkOption.NOFOLLOW_LINKS).getName();
+        String[] name = programmer.split("\\\\");
+        programmer = name[name.length-1];
+        
+        String jobQuery = "INSERT INTO `dlaub25_lasersched`.`jobs` (`jobNum`, `client`, `jobName`, `programmer`) VALUES (?, ?, ?, ?, "+ programmer +");";
+        ArrayList jobValues = new ArrayList();
+        for (int column = 0; column <= lastJobFieldIndex; column++){
+            jobValues.add(reader.get(column));
         }
         
-        for(String[] record : jobValues){
-            for (int column = 0; column < record.length; column++) {
-                if(column > 2){
-                    break;
+        String pkgQuery = "";
+        ArrayList packageValues = new ArrayList();
+        while(reader.readRecord()){
+            for (int column = firstPkgFieldIndex; column < reader.getColumnCount(); column++) {
+                try{
+                    DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+                    Date result =  df.parse(reader.get(column));
+                    packageValues.add(result);
+                }catch(ParseException pex){
+                    try{
+                        if(Integer.parseInt(reader.get(column)) != Double.parseDouble(reader.get(column))){
+                            double d = Double.parseDouble(reader.get(column));
+                            packageValues.add(d);
+                        }else{
+                            int i = Integer.parseInt(reader.get(column));
+                            packageValues.add(i);
+                        }                        
+                    }catch(NumberFormatException nfex){
+                        String s = reader.get(column);
+                        packageValues.add(s);
+                    }
                 }
-                
             }
         }
-//        jobNum = n;
-//        client = c;
-//        jobName = j;
-//        status = s;
-//        programmer = pro;
-//        id = i;
-//        packages = buildPackageArray();
     }
     ////////////////////////////////////////////////////////////////////////////
     public static ArrayList exportHandler(Job j) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException{
@@ -134,7 +156,10 @@ public class ProductionSchedule {
     ////////////////////////////////////////////////////////////////////////////
     public static void test() throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException, FileNotFoundException, IOException{
         File f = new File("C:\\LASER\\csv Reports\\65268 Laser Production Count Sheet.csv");
-        csvToJob(f);
+        CsvReader newReader = new CsvReader("C:\\LASER\\csv Reports\\65268 Laser Production Count Sheet.csv");
+        String programmer = Files.getOwner(f.toPath(), LinkOption.NOFOLLOW_LINKS).getName();
+        String[] name = programmer.split("\\\\");
+        UI.errorWindow(name[name.length-1]);
     }
     ////////////////////////////////////////////////////////////////////////////
 //    public static JTable buildJobTable(ArrayList jobs){
