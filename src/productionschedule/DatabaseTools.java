@@ -52,16 +52,17 @@ public class DatabaseTools {
         
     }
     ////////////////////////////////////////////////////////////////////////////
-    public void int updateDatabase (DatabaseObject dbo, String query, ArrayList values) throws ClassNotFoundException, SQLException{
+    public static int updateDatabase (DatabaseObject dbo, String query, ArrayList values) throws ClassNotFoundException, SQLException{
+        CachedRowSet rowSet = new CachedRowSetImpl();
         Class.forName("com.mysql.jdbc.Driver"); 
         Connection connection = DriverManager.getConnection(dbo.address, dbo.userName, dbo.password);
         if(query.toUpperCase().startsWith("UPDATE") || query.toUpperCase().contains("INSERT")){
-            PreparedStatement preparedStmtUpdate = connection.prepareStatement(query);
+            PreparedStatement preparedStmtUpdate = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);;
             if(countCharOccurances(query, '?') != values.size()){
                 UI.errorWindow("Prepared statement marker count mismatch.");
             }
             else{
-                for (int i = 1; i < values.size(); i++) {
+                for (int i = 1; i < values.size()+1; i++) {
                     int objectType = 0;
                     switch (values.get(i-1).getClass().getName()) {
                         case "java.lang.String":
@@ -85,9 +86,15 @@ public class DatabaseTools {
                     else{
                         preparedStmtUpdate.setObject(i, values.get(i-1), objectType);
                     }
-                    ResultSet rs = connection.createStatement().executeQuery("SELECT `id` FROM `jobs` WHERE ORDER BY `id` DESC LIMIT 1;");
+                    
                 }
-                preparedStmtUpdate.executeUpdate();
+                
+                int i = preparedStmtUpdate.executeUpdate();
+                System.out.println(i);
+                ResultSet rs2 = preparedStmtUpdate.getGeneratedKeys();
+                //rs2.first();
+                //System.out.println(rs2.getInt(1));
+                rowSet.populate(rs2);
             }
             
         } 
@@ -95,9 +102,11 @@ public class DatabaseTools {
             throw new MySQLSyntaxErrorException("Statements must begin with \"UPDATE\" or \"INSERT\"!");
         }
         connection.close();
+        rowSet.first();
+        return rowSet.getInt(1);
     }
     ////////////////////////////////////////////////////////////////////////////
-    public void multiUpdateDatabase (DatabaseObject dbo, String query, ArrayList values) throws ClassNotFoundException, SQLException{
+    public static void multiUpdateDatabase (DatabaseObject dbo, String query, ArrayList values) throws ClassNotFoundException, SQLException{
         Class.forName("com.mysql.jdbc.Driver"); 
         Connection connection = DriverManager.getConnection(dbo.address, dbo.userName, dbo.password);
         if(query.toUpperCase().startsWith("UPDATE") || query.toUpperCase().contains("INSERT")){     //Checking integrity of query and values
@@ -109,8 +118,9 @@ public class DatabaseTools {
             else{
                 for (int record = 0; record < values.size(); record++) {
                     ArrayList recordValues = (ArrayList) values.get(record);
-                    for (int column = 1; column < recordValues.size(); column++) {
+                    for (int column = 1; column <= recordValues.size(); column++) {
                         int objectType = 0;
+                        System.out.println(recordValues.get(column-1).getClass().getName());
                         switch (recordValues.get(column-1).getClass().getName()) {
                             case "java.lang.String":
                                 objectType = sqlString;
@@ -118,7 +128,7 @@ public class DatabaseTools {
                             case "java.util.Date":
                                 objectType = sqlDate;
                                 break;
-                            case "int":
+                            case "java.lang.Integer":
                                 objectType = sqlInt;
                                 break;
                             case "double":

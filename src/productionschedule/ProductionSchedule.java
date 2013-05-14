@@ -71,23 +71,26 @@ public class ProductionSchedule {
 //        return j;
 //    }
     ////////////////////////////////////////////////////////////////////////////
-    public static void csvToJob(File f) throws FileNotFoundException, IOException, ClassNotFoundException, ParseException{
+    public static void csvToJob(File f) throws FileNotFoundException, IOException, ClassNotFoundException, ParseException, SQLException{
         CsvReader reader = new CsvReader(new FileReader(f));
+        int jobId;
         reader.readHeaders();
         reader.readRecord();
         String programmer = Files.getOwner(f.toPath(), LinkOption.NOFOLLOW_LINKS).getName();
         String[] name = programmer.split("\\\\");
         programmer = name[name.length-1];
         
-        String jobQuery = "INSERT INTO `dlaub25_lasersched`.`jobs` (`jobNum`, `client`, `jobName`, `programmer`) VALUES (?, ?, ?, ?, "+ programmer +");";
+        String jobQuery = "INSERT INTO `dlaub25_lasersched`.`jobs` (`jobNum`, `client`, `jobName`, `programmer`) VALUES (?, ?, ?, '"+ programmer +"');";
+        System.out.println(jobQuery);
         ArrayList jobValues = new ArrayList();
         for (int column = 0; column <= lastJobFieldIndex; column++){
             jobValues.add(reader.get(column));
         }
-        
-        String pkgQuery = "";
-        ArrayList packageValues = new ArrayList();
+        jobId = DatabaseTools.updateDatabase(dbo, jobQuery, jobValues);
+        String pkgQuery = "INSERT INTO `dlaub25_lasersched`.`packages` (`pkgName`, `size`, `nUp`, `ERT`, `mailDate`, `id`) VALUES (?, ?, ?, ?, ?, '" + jobId + "');";
+        ArrayList packages = new ArrayList();
         while(reader.readRecord()){
+            ArrayList packageValues = new ArrayList();
             for (int column = firstPkgFieldIndex; column < reader.getColumnCount(); column++) {
                 try{
                     DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
@@ -108,7 +111,9 @@ public class ProductionSchedule {
                     }
                 }
             }
+            packages.add(packageValues);
         }
+        DatabaseTools.multiUpdateDatabase(dbo, pkgQuery, packages);
     }
     ////////////////////////////////////////////////////////////////////////////
     public static ArrayList exportHandler(Job j) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException{
@@ -154,12 +159,10 @@ public class ProductionSchedule {
         return jobs;
     }
     ////////////////////////////////////////////////////////////////////////////
-    public static void test() throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException, FileNotFoundException, IOException{
-        File f = new File("C:\\LASER\\csv Reports\\65268 Laser Production Count Sheet.csv");
+    public static void test() throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException, FileNotFoundException, IOException, ParseException{
+        File f = new File("C:\\LASER\\csv Reports\\65395 Laser Production Count Sheet.csv");
         CsvReader newReader = new CsvReader("C:\\LASER\\csv Reports\\65268 Laser Production Count Sheet.csv");
-        String programmer = Files.getOwner(f.toPath(), LinkOption.NOFOLLOW_LINKS).getName();
-        String[] name = programmer.split("\\\\");
-        UI.errorWindow(name[name.length-1]);
+        csvToJob(f);
     }
     ////////////////////////////////////////////////////////////////////////////
 //    public static JTable buildJobTable(ArrayList jobs){
