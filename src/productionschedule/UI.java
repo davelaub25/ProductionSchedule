@@ -12,6 +12,7 @@ import java.awt.dnd.DragSource;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.TooManyListenersException;
 import java.util.Vector;
@@ -35,57 +36,51 @@ import static productionschedule.ProductionSchedule.importHandler;
  * @author dlaub
  */
 public class UI extends javax.swing.JFrame {
-    
+
     private DefaultTableModel tableModel;
     private JTable table;
-    
-    
-    //public static Job j = new Job(1, "A", "B", "C", "D", "E", 2);
 
+    //public static Job j = new Job(1, "A", "B", "C", "D", "E", 2);
     /**
      * Creates new form UI
      */
     public UI() throws TooManyListenersException, ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException {
         initComponents();
-        
-        DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched","dlaub25_fmi","admin");
+
+        DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched", "dlaub25_fmi", "admin");
         String query = "SELECT * FROM jobs";
         DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
         int columnCount = dboo.rowSet.getMetaData().getColumnCount();
         ArrayList jobs = importHandler(dboo);
         Job j = (Job) jobs.get(0);
         ArrayList packList = j.packages;
-        
+
         DefaultTableModel poolModel = new DefaultTableModel(
-            new Object [][] {
-                {"pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1"},{"pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2"}
+                new Object[][]{
+                    {"pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1"}, {"pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2"}
                 },
-            new String [] {
-                "Job #", "Client", "Job Name", "Mail Date", "Type", "Job Status", "Notes", "Programmer", "Sign Offs", "Approved", 
-                "Production", "Platform", "CSR", "Printer", "Data", "ID"
-                }
-                
-            );
+                new String[]{
+                    "Job #", "Client", "Job Name", "Mail Date", "Type", "Job Status", "Notes", "Programmer", "Sign Offs", "Approved",
+                    "Production", "Platform", "CSR", "Printer", "Data", "ID"
+                });
         DefaultTableModel bonnieModel = new DefaultTableModel(
-            new Object [][] {
-                {"bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2"},{"bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1"}
+                new Object[][]{
+                    {"bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2"}, {"bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1"}
                 },
-            new String [] {
-                "Job #", "Client", "Job Name", "Mail Date", "Type", "Job Status", "Notes", "Programmer", "Sign Offs", "Approved", 
-                "Production", "Platform", "CSR", "Printer", "Data", "ID"
-                }
-                
-            );
+                new String[]{
+                    "Job #", "Client", "Job Name", "Mail Date", "Type", "Job Status", "Notes", "Programmer", "Sign Offs", "Approved",
+                    "Production", "Platform", "CSR", "Printer", "Data", "ID"
+                });
         AbstractTableModel jtm = new JobTableModel(jobs);
         JobTableModel ptm = new JobTableModel(packList);
-        
+
         JTable jtmPool1 = new JTable(jtm);
         JTable jtmPool2 = new JTable(ptm);
         JTable dtPool1 = new JTable(poolModel);
         JTable dtPool2 = new JTable(bonnieModel);
-        
+
         TransferHandler jtmHandler = new TableRowTransferHandler();
-        
+
         jtmPool1.setDragEnabled(true);
         jtmPool1.setDropMode(DropMode.INSERT_ROWS);
         jtmPool1.setTransferHandler(jtmHandler);
@@ -98,7 +93,7 @@ public class UI extends javax.swing.JFrame {
         dtPool2.setDragEnabled(true);
         dtPool2.setDropMode(DropMode.INSERT_ROWS);
         dtPool2.setTransferHandler(jtmHandler);
-        
+
         jobPoolPane.setViewportView(jtmPool1);
         bonniePane.setViewportView(jtmPool2);
         clydePane.setViewportView(dtPool1);
@@ -275,13 +270,14 @@ public class UI extends javax.swing.JFrame {
     private void testButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testButtonActionPerformed
         try {
             ProductionSchedule.test();
-        } catch (    IllegalArgumentException | IllegalAccessException | ClassNotFoundException | SQLException ex) {
-            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException | ParseException | SQLException ex) {
+            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
         }
+
     }//GEN-LAST:event_testButtonActionPerformed
 
     /**
@@ -291,7 +287,7 @@ public class UI extends javax.swing.JFrame {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -316,11 +312,10 @@ public class UI extends javax.swing.JFrame {
             public void run() {
                 try {
                     new UI().setVisible(true);
-                } catch (        TooManyListenersException | ClassNotFoundException | SQLException | IllegalArgumentException | IllegalAccessException ex) {
+                } catch (TooManyListenersException | ClassNotFoundException | SQLException | IllegalArgumentException | IllegalAccessException ex) {
                     Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-            
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -436,16 +431,18 @@ public class UI extends javax.swing.JFrame {
             addIndex = -1;
         }
     }
-    public static void errorWindow(String errorMessage){
+
+    public static void errorWindow(String errorMessage) {
         Frame f = new Frame();
         JOptionPane.showMessageDialog(f, errorMessage);
     }
+
     protected static Vector convertToVector(Object[] anArray, int i) {
         if (anArray == null) {
             return null;
         }
         Vector<Object> v = new Vector<Object>(anArray.length);
-            v.add(anArray[i]);
+        v.add(anArray[i]);
 
         return v;
     }
