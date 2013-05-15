@@ -41,6 +41,13 @@ class JobTableModel extends AbstractTableModel {
             setDataVector(convertToVector(a), convertToVector(l));
             
         }
+        public JobTableModel(ArrayList l, ArrayList l2) {
+            Object[] a;
+            a = l.toArray();                        
+            datalist.addAll(l);
+            setDataVector(convertToVector(a), convertToVector(l));
+            
+        }
         ////////////////////////////////////////////////////////////////////////
         public int getColumnCount() {
             Field[] fieldList = datalist.get(0).getClass().getDeclaredFields();
@@ -68,7 +75,7 @@ class JobTableModel extends AbstractTableModel {
         public Object getValueAt(int row, int col) {
             Object job;
             Vector v = new Vector();
-            v.add(stop);
+            //v.add(stop);
             if(datalist.get(row).getClass().getSimpleName() == "Vector"){
                 v = (Vector)datalist.get(row);
             }
@@ -76,13 +83,11 @@ class JobTableModel extends AbstractTableModel {
                 job = (Object) datalist.get(row);
                 Vector vec = (Vector)job;
                 job = (Object)vec.get(0);
-                System.out.println("");
             }
             else if("Vector".equals(datalist.get(row).getClass().getSimpleName())){
                 job = (Object) datalist.get(row);
                 Vector vec = (Vector)job;
                 job = (Object)vec.get(0);
-                System.out.println("");
             }
             else{
                 job = (Object) datalist.get(row);

@@ -98,6 +98,10 @@ public class UI extends javax.swing.JFrame {
         bonniePane.setViewportView(jtmPool2);
         clydePane.setViewportView(dtPool1);
         ocePane.setViewportView(dtPool2);
+        jtmPool1.setFillsViewportHeight(true);
+        jtmPool2.setFillsViewportHeight(true);
+        dtPool1.setFillsViewportHeight(true);
+        dtPool2.setFillsViewportHeight(true);
     }
 
     /**
@@ -117,6 +121,7 @@ public class UI extends javax.swing.JFrame {
         clydePane = new javax.swing.JScrollPane();
         ocePane = new javax.swing.JScrollPane();
         jSeparator1 = new javax.swing.JSeparator();
+        refreshButton = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         jPanel3 = new javax.swing.JPanel();
@@ -136,6 +141,13 @@ public class UI extends javax.swing.JFrame {
 
         ocePane.setPreferredSize(new java.awt.Dimension(100, 200));
 
+        refreshButton.setText("Refresh List");
+        refreshButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                refreshButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -150,7 +162,10 @@ public class UI extends javax.swing.JFrame {
                         .addComponent(pkgPoolPane, javax.swing.GroupLayout.DEFAULT_SIZE, 908, Short.MAX_VALUE))
                     .addComponent(clydePane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(ocePane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(bonniePane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(bonniePane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(refreshButton)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -168,7 +183,9 @@ public class UI extends javax.swing.JFrame {
                 .addComponent(clydePane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(ocePane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 72, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 217, Short.MAX_VALUE)
+                .addComponent(refreshButton)
+                .addContainerGap())
         );
 
         jTabbedPane1.addTab("tab1", jPanel1);
@@ -222,7 +239,7 @@ public class UI extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 887, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 1066, Short.MAX_VALUE)
                 .addContainerGap())
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(44, 44, 44)
@@ -280,6 +297,10 @@ public class UI extends javax.swing.JFrame {
 
     }//GEN-LAST:event_testButtonActionPerformed
 
+    private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_refreshButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -331,6 +352,7 @@ public class UI extends javax.swing.JFrame {
     private javax.swing.JScrollPane jobPoolPane;
     private javax.swing.JScrollPane ocePane;
     private javax.swing.JScrollPane pkgPoolPane;
+    private javax.swing.JButton refreshButton;
     private javax.swing.JButton testButton;
     // End of variables declaration//GEN-END:variables
 
