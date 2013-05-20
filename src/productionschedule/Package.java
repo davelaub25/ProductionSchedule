@@ -9,12 +9,12 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
 
-
 /**
  *
  * @author dlaub
  */
-public class Package{
+public class Package {
+
     public String pkgName;   // Contained in CSV
     public Date mailDate; // Contained in CSV
     public String status;
@@ -23,7 +23,10 @@ public class Package{
     public int nUp;       // Contained in CSV
     public String printer;
     public Double ert;    // Contained in CSV
-    public Package(String n, Date m, String st, int si, int u, Double e){
+    public String queuePos;
+    public int id;
+
+    public Package(String n, Date m, String st, int si, int u, Double e, String qp, int i) {
         pkgName = n;
         mailDate = m;
         status = st;
@@ -32,31 +35,38 @@ public class Package{
         ert = e;
         pages = numberOfPages();
         printer = "None";
+        queuePos = qp;
+        id = i;
     }
     ////////////////////////////////////////////////////////////////////////////
-    Package(Map properties, boolean csvSourced) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException { 
+
+    Package(Map properties, boolean csvSourced) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException {
         Field fieldlist[] = this.getClass().getDeclaredFields();
         for (int i = 0; i < fieldlist.length; i++) {
             fieldlist[i].set(this, properties.get(fieldlist[i].getName()));
         }
         status = "inQueue";
         pages = numberOfPages();
+        queuePos = "";
         printer = "none";
     }
-    Package(Map properties) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException { 
+
+    Package(Map properties) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException {
         Field fieldlist[] = this.getClass().getDeclaredFields();
         for (int i = 0; i < fieldlist.length; i++) {
             fieldlist[i].set(this, properties.get(fieldlist[i].getName()));
         }
     }
     ////////////////////////////////////////////////////////////////////////////
-    public int numberOfPages(){
-        double pageCount = size/nUp;
+
+    public int numberOfPages() {
+        double pageCount = size / nUp;
         pageCount = Math.ceil(pageCount);
-        return (int)pageCount;
+        return (int) pageCount;
     }
     ////////////////////////////////////////////////////////////////////////////
-    public void setDate(Date d){
+
+    public void setDate(Date d) {
         mailDate = d;
     }
 }

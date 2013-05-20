@@ -109,6 +109,7 @@ public class ProductionSchedule {
             Logger.getLogger(ProductionSchedule.class.getName()).log(Level.SEVERE, "Problem inserting job into SQL database", ex);
         }
     }
+
     public static void csvToJob(File[] f) throws FileNotFoundException, IOException, ClassNotFoundException, ParseException, SQLException {
         for (File files : f) {
             CsvReader reader = new CsvReader(new FileReader(files));
@@ -187,6 +188,7 @@ public class ProductionSchedule {
     ////////////////////////////////////////////////////////////////////////////
 
     public static ArrayList importHandler(DatabaseOutputObject exDBOO) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException {
+        // TODO add packages to importHandler
         ArrayList jobs = new ArrayList();
         while (exDBOO.rowSet.next()) {
             int numberOfColumns = exDBOO.rowSet.getMetaData().getColumnCount();

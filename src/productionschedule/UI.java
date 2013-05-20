@@ -4,11 +4,7 @@
  */
 package productionschedule;
 
-import java.awt.Cursor;
 import java.awt.Frame;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.dnd.DragSource;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -18,15 +14,10 @@ import java.util.TooManyListenersException;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.activation.ActivationDataFlavor;
-import javax.activation.DataHandler;
 import javax.swing.DropMode;
-import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.TransferHandler;
-import static javax.swing.TransferHandler.COPY_OR_MOVE;
-import static javax.swing.TransferHandler.MOVE;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import static productionschedule.ProductionSchedule.importHandler;
@@ -39,6 +30,7 @@ public class UI extends javax.swing.JFrame {
 
     private DefaultTableModel tableModel;
     private JTable table;
+    public ArrayList jobs;
 
     //public static Job j = new Job(1, "A", "B", "C", "D", "E", 2);
     /**
@@ -51,33 +43,20 @@ public class UI extends javax.swing.JFrame {
         String query = "SELECT * FROM jobs";
         DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
         int columnCount = dboo.rowSet.getMetaData().getColumnCount();
-        ArrayList jobs = importHandler(dboo);
+        jobs = importHandler(dboo);
         Job j = (Job) jobs.get(0);
         ArrayList packList = j.packages;
+        ArrayList bonnie = new ArrayList();
+        Package p = (Package) j.packages.get(0);
 
-        DefaultTableModel poolModel = new DefaultTableModel(
-                new Object[][]{
-                    {"pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1", "pool1"}, {"pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2", "pool2"}
-                },
-                new String[]{
-                    "Job #", "Client", "Job Name", "Mail Date", "Type", "Job Status", "Notes", "Programmer", "Sign Offs", "Approved",
-                    "Production", "Platform", "CSR", "Printer", "Data", "ID"
-                });
-        DefaultTableModel bonnieModel = new DefaultTableModel(
-                new Object[][]{
-                    {"bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2", "bonnie2"}, {"bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1", "bonnie1"}
-                },
-                new String[]{
-                    "Job #", "Client", "Job Name", "Mail Date", "Type", "Job Status", "Notes", "Programmer", "Sign Offs", "Approved",
-                    "Production", "Platform", "CSR", "Printer", "Data", "ID"
-                });
-        AbstractTableModel jtm = new JobTableModel(jobs);
-        JobTableModel ptm = new JobTableModel(packList);
+        AbstractTableModel jtm = new PoolTableModel(jobs);
+        AbstractTableModel ptm = new PoolTableModel(packList);
+        AbstractTableModel ctm = new PoolTableModel(p);
+
 
         JTable jtmPool1 = new JTable(jtm);
         JTable jtmPool2 = new JTable(ptm);
-        JTable dtPool1 = new JTable(poolModel);
-        JTable dtPool2 = new JTable(bonnieModel);
+        JTable jtmPool3 = new JTable(ctm);
 
         TransferHandler jtmHandler = new TableRowTransferHandler();
 
@@ -87,21 +66,19 @@ public class UI extends javax.swing.JFrame {
         jtmPool2.setDragEnabled(true);
         jtmPool2.setDropMode(DropMode.INSERT_ROWS);
         jtmPool2.setTransferHandler(jtmHandler);
-        dtPool1.setDragEnabled(true);
-        dtPool1.setDropMode(DropMode.INSERT_ROWS);
-        dtPool1.setTransferHandler(jtmHandler);
-        dtPool2.setDragEnabled(true);
-        dtPool2.setDropMode(DropMode.INSERT_ROWS);
-        dtPool2.setTransferHandler(jtmHandler);
+        jtmPool3.setDragEnabled(true);
+        jtmPool3.setDropMode(DropMode.INSERT_ROWS);
+        jtmPool3.setTransferHandler(jtmHandler);
+
 
         jobPoolPane.setViewportView(jtmPool1);
-        bonniePane.setViewportView(jtmPool2);
-        clydePane.setViewportView(dtPool1);
-        ocePane.setViewportView(dtPool2);
+        pkgPoolPane.setViewportView(jtmPool2);
+        bonniePane.setViewportView(jtmPool3);
+
         jtmPool1.setFillsViewportHeight(true);
         jtmPool2.setFillsViewportHeight(true);
-        dtPool1.setFillsViewportHeight(true);
-        dtPool2.setFillsViewportHeight(true);
+        jtmPool3.setFillsViewportHeight(true);
+
     }
 
     /**
@@ -355,104 +332,6 @@ public class UI extends javax.swing.JFrame {
     private javax.swing.JButton refreshButton;
     private javax.swing.JButton testButton;
     // End of variables declaration//GEN-END:variables
-
-    class TableRowTransferHandler extends TransferHandler {
-
-        private int[] rows = null;
-        private int addIndex = -1; //Location where items were added
-        private int addCount = 0;  //Number of items added.
-        private final DataFlavor localObjectFlavor;
-        private Object[] transferedObjects = null;
-        private JComponent source = null;
-
-        public TableRowTransferHandler() {
-            localObjectFlavor = new ActivationDataFlavor(
-                    Object[].class, DataFlavor.javaJVMLocalObjectMimeType, "Array of items");
-        }
-
-        @Override
-        protected Transferable createTransferable(JComponent c) {
-            source = c;
-            JTable table = (JTable) c;
-            JobTableModel model = (JobTableModel) table.getModel();
-            ArrayList<Object> list = new ArrayList<Object>();
-            for (int i : rows = table.getSelectedRows()) {
-                list.add(model.getDataVector().elementAt(i));
-            }
-            transferedObjects = list.toArray();
-            return new DataHandler(transferedObjects, localObjectFlavor.getMimeType());
-        }
-
-        @Override
-        public boolean canImport(TransferSupport info) {
-            JTable t = (JTable) info.getComponent();
-            boolean b = info.isDrop() && info.isDataFlavorSupported(localObjectFlavor);
-            //XXX bug?
-            t.setCursor(b ? DragSource.DefaultMoveDrop : DragSource.DefaultMoveNoDrop);
-            return b;
-        }
-
-        @Override
-        public int getSourceActions(JComponent c) {
-            return COPY_OR_MOVE;
-        }
-
-        @Override
-        public boolean importData(TransferSupport info) {
-            JTable target = (JTable) info.getComponent();
-            JTable.DropLocation dl = (JTable.DropLocation) info.getDropLocation();
-            JobTableModel model = (JobTableModel) target.getModel();
-            int index = dl.getRow();
-            int max = model.getRowCount();
-            if (index < 0 || index > max) {
-                index = max;
-            }
-            addIndex = index;
-            target.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-            try {
-                Object[] values =
-                        (Object[]) info.getTransferable().getTransferData(localObjectFlavor);
-                if (source != target) {
-                    addCount = values.length;
-                }
-                for (int i = 0; i < values.length; i++) {
-                    int idx = index++;
-
-                    model.insertRow(idx, values[i]);
-
-                    target.getSelectionModel().addSelectionInterval(idx, idx);
-                }
-                return true;
-            } catch (Exception ufe) {
-                ufe.printStackTrace();
-            }
-            return false;
-        }
-
-        @Override
-        protected void exportDone(JComponent c, Transferable t, int act) {
-            cleanup(c, act == MOVE);
-        }
-
-        private void cleanup(JComponent src, boolean remove) {
-            if (remove && rows != null) {
-                JTable table = (JTable) src;
-                src.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-                JobTableModel model = (JobTableModel) table.getModel();
-                if (addCount > 0) {
-                    for (int i = 0; i < rows.length; i++) {
-                        //if(rows[i]>=addIndex) { rows[i] += addCount; }
-                    }
-                }
-                for (int i = rows.length - 1; i >= 0; i--) {
-                    model.removeRow(rows[i]);
-                }
-            }
-            rows = null;
-            addCount = 0;
-            addIndex = -1;
-        }
-    }
 
     public static void errorWindow(String errorMessage) {
         Frame f = new Frame();
