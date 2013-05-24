@@ -7,6 +7,7 @@ package productionschedule;
 import java.awt.Frame;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -262,14 +263,23 @@ public class UI extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void testButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testButtonActionPerformed
-        try {
-            ProductionSchedule.test();
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException | ParseException | SQLException ex) {
-            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+        try{
+            DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched", "dlaub25_fmi", "admin");
+            String query = "SELECT * FROM jobs";
+            DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
+            int columnCount = dboo.rowSet.getMetaData().getColumnCount();
+            jobs = importHandler(dboo);
+            Job j = (Job) jobs.get(0);
+            ArrayList packList = j.packages;
+            ArrayList bonnie = new ArrayList();
+            Package p = (Package) j.packages.get(0);
+            JobPackage jP = new JobPackage(p, dbo);
+
+            for (Field o : jP) {
+                System.out.println(o.get(jP));
+            }
+        }catch(ClassNotFoundException| IllegalAccessException| IllegalArgumentException| SQLException ex){
+            Logger.getLogger(ProductionSchedule.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }//GEN-LAST:event_testButtonActionPerformed

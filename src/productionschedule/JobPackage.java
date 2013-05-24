@@ -7,14 +7,19 @@ package productionschedule;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
  *
  * @author dlaub
  */
-public class JobPackage {
+public class JobPackage implements Iterable<Field>{
+    
+    private List<Field> m_JobPackage;
 
     public String jobNum;       //Contained in csv
     public String client;       //Contained in csv
@@ -50,12 +55,14 @@ public class JobPackage {
     }
 
     JobPackage(Package p, DatabaseObject dO) throws ClassNotFoundException, SQLException {
-        String query = "SELECT * FROM 'jobs' WHERE 'id' = " + p.id;
+        String query = "SELECT * FROM `jobs` WHERE `id` = " + p.id;
         DatabaseOutputObject dBoo = DatabaseTools.queryDatabase(dO, query);
-        jobNum = dBoo.rowSet.getString(jobNum.getClass().getSimpleName());
-        client = dBoo.rowSet.getString(client.getClass().getSimpleName());
-        jobName = dBoo.rowSet.getString(jobName.getClass().getSimpleName());
-        pkgName = p.pkgName;
+        dBoo.rowSet.first();
+        jobNum = dBoo.rowSet.getString("jobNum");
+        client = dBoo.rowSet.getString("client");
+        jobName = dBoo.rowSet.getString("jobName");
+        pkgName = 
+                p.pkgName;
         mailDate = p.mailDate;
         status = p.status;
         size = p.size;
@@ -63,9 +70,12 @@ public class JobPackage {
         ert = p.ert;
         pages = numberOfPages();
         printer = p.printer;
-        programmer = dBoo.rowSet.getString(programmer.getClass().getSimpleName());
+        programmer = dBoo.rowSet.getString("programmer");
         id = dBoo.rowSet.getInt("id");
         queuePos = p.queuePos;
+        
+        Field fieldlist[] = this.getClass().getFields();
+        m_JobPackage =  Arrays.asList(fieldlist);
 
     }
     ////////////////////////////////////////////////////////////////////////////
@@ -87,5 +97,11 @@ public class JobPackage {
 
     public void setDate(Date d) {
         mailDate = d;
+    }
+
+    @Override
+    public Iterator<Field> iterator() {
+        Iterator<Field> iprof = m_JobPackage.iterator();
+        return iprof;
     }
 }
