@@ -15,7 +15,7 @@ import javax.swing.table.AbstractTableModel;
  *
  * @author dlaub
  */
-class PrinterTableModel extends AbstractTableModel {
+class JobTableModel extends AbstractTableModel {
 
     private ArrayList datalist = new ArrayList();
     protected Vector dataVector;
@@ -34,7 +34,7 @@ class PrinterTableModel extends AbstractTableModel {
     }
     ////////////////////////////////////////////////////////////////////////
 
-    public PrinterTableModel(ArrayList l) {
+    public JobTableModel(ArrayList l) {
         Object[] a;
         a = l.toArray();
         datalist.addAll(l);
@@ -43,7 +43,7 @@ class PrinterTableModel extends AbstractTableModel {
     }
     ////////////////////////////////////////////////////////////////////////////
 
-    public PrinterTableModel(Object o) {
+    public JobTableModel(Object o) {
         Object[] a = {o};
         datalist.add(o);
         setDataVector(convertToVector(a), convertToVector(o));
@@ -51,7 +51,7 @@ class PrinterTableModel extends AbstractTableModel {
     }
     ////////////////////////////////////////////////////////////////////////////
 
-    public PrinterTableModel(ArrayList l, ArrayList l2) {
+    public JobTableModel(ArrayList l, ArrayList l2) {
         Object[] a;
         a = l.toArray();
         datalist.addAll(l);
@@ -111,7 +111,7 @@ class PrinterTableModel extends AbstractTableModel {
         try {
             return fieldList[col].get(job);
         } catch (IllegalArgumentException | IllegalAccessException ex) {
-            Logger.getLogger(PrinterTableModel.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(JobTableModel.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }

@@ -49,10 +49,11 @@ public class UI extends javax.swing.JFrame {
         ArrayList packList = j.packages;
         ArrayList bonnie = new ArrayList();
         Package p = (Package) j.packages.get(0);
+        JobPackage jP = new JobPackage(p, dbo);
 
-        AbstractTableModel jtm = new PoolTableModel(jobs);
+        AbstractTableModel jtm = new JobTableModel(jobs);
         AbstractTableModel ptm = new PoolTableModel(packList);
-        AbstractTableModel ctm = new PoolTableModel(p);
+        AbstractTableModel ctm = new PrinterTableModel(jP);
 
 
         JTable jtmPool1 = new JTable(jtm);
@@ -61,7 +62,7 @@ public class UI extends javax.swing.JFrame {
 
         TransferHandler jtmHandler = new TableRowTransferHandler();
 
-        jtmPool1.setDragEnabled(true);
+        jtmPool1.setDragEnabled(false);
         jtmPool1.setDropMode(DropMode.INSERT_ROWS);
         jtmPool1.setTransferHandler(jtmHandler);
         jtmPool2.setDragEnabled(true);
@@ -263,25 +264,6 @@ public class UI extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void testButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testButtonActionPerformed
-        try{
-            DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched", "dlaub25_fmi", "admin");
-            String query = "SELECT * FROM jobs";
-            DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
-            int columnCount = dboo.rowSet.getMetaData().getColumnCount();
-            jobs = importHandler(dboo);
-            Job j = (Job) jobs.get(0);
-            ArrayList packList = j.packages;
-            ArrayList bonnie = new ArrayList();
-            Package p = (Package) j.packages.get(0);
-            JobPackage jP = new JobPackage(p, dbo);
-
-            for (Field o : jP) {
-                System.out.println(o.get(jP));
-            }
-        }catch(ClassNotFoundException| IllegalAccessException| IllegalArgumentException| SQLException ex){
-            Logger.getLogger(ProductionSchedule.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
     }//GEN-LAST:event_testButtonActionPerformed
 
     private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshButtonActionPerformed

@@ -57,6 +57,19 @@ public class Package {
             fieldlist[i].set(this, properties.get(fieldlist[i].getName()));
         }
     }
+
+    Package(JobPackage jP) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException {
+        pkgName = jP.pkgName;
+        mailDate = jP.mailDate;
+        status = jP.status;
+        size = jP.size;
+        pages = jP.pages;
+        nUp = jP.nUp;
+        printer = jP.printer;
+        ert = jP.ert;
+        queuePos = jP.queuePos;
+        id = jP.id;
+    }
     ////////////////////////////////////////////////////////////////////////////
 
     public int numberOfPages() {

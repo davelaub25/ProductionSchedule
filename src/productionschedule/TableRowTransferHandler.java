@@ -14,6 +14,7 @@ import javax.activation.DataHandler;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.TransferHandler;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -21,12 +22,16 @@ import javax.swing.TransferHandler;
  */
 class TableRowTransferHandler extends TransferHandler {
 
+    public static final String address = "jdbc:mysql://davelaub.com:3306/dlaub25_lasersched";
+    public static final String userName = "dlaub25_fmi";
+    public static final String password = "admin";
     private int[] rows = null;
     private int addIndex = -1; //Location where items were added
     private int addCount = 0;  //Number of items added.
     private final DataFlavor localObjectFlavor;
     private Object[] transferedObjects = null;
     private JComponent source = null;
+    private DatabaseObject dbo = new DatabaseObject(address, userName, password);
 
     public TableRowTransferHandler() {
         localObjectFlavor = new ActivationDataFlavor(
@@ -64,27 +69,53 @@ class TableRowTransferHandler extends TransferHandler {
     public boolean importData(TransferHandler.TransferSupport info) {
         JTable target = (JTable) info.getComponent();
         JTable.DropLocation dl = (JTable.DropLocation) info.getDropLocation();
-        PoolTableModel model = (PoolTableModel) target.getModel();
+        DefaultTableModel tempModel = (DefaultTableModel) target.getModel();
+
+
         int index = dl.getRow();
-        int max = model.getRowCount();
+        int max = tempModel.getRowCount();
         if (index < 0 || index > max) {
             index = max;
         }
         addIndex = index;
+        PoolTableModel.stop = true;
         target.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         try {
-            Object[] values =
-                    (Object[]) info.getTransferable().getTransferData(localObjectFlavor);
+            Object[] values = (Object[]) info.getTransferable().getTransferData(localObjectFlavor);
+
+
             if (source != target) {
                 addCount = values.length;
             }
             for (int i = 0; i < values.length; i++) {
-                int idx = index++;
+                JTable sourceTable = (JTable) source;
+                JTable targetTable = (JTable) info.getComponent();
+                if (targetTable.getModel().getClass().getSimpleName().equals("PrinterTableModel") && sourceTable.getModel().getClass().getSimpleName().equals("PoolTableModel")) {
+                    PrinterTableModel model = (PrinterTableModel) target.getModel();
+                    JobPackage jP = new JobPackage((Package) values[i], dbo);
+                    int idx = index++;
+                    model.insertRow(idx, values[i]);
+                    target.getSelectionModel().addSelectionInterval(idx, idx);
+                } else if (targetTable.getModel().getClass().getSimpleName().equals("PoolTableModel") && sourceTable.getModel().getClass().getSimpleName().equals("PoolTableModel")) {
+                    PoolTableModel model = (PoolTableModel) target.getModel();
+                    Package p = new Package((JobPackage) values[i]);
+                    int idx = index++;
+                    model.insertRow(idx, values[i]);
+                    target.getSelectionModel().addSelectionInterval(idx, idx);
+                } else if (target.getModel().getClass().getSimpleName().equals("PoolTableModel")) {
+                    PoolTableModel model = (PoolTableModel) target.getModel();
+                    int idx = index++;
+                    model.insertRow(idx, values[i]);
+                    target.getSelectionModel().addSelectionInterval(idx, idx);
+                } else if (target.getModel().getClass().getSimpleName().equals("PrinterTableModel")) {
+                    PrinterTableModel model = (PrinterTableModel) target.getModel();
+                    int idx = index++;
+                    model.insertRow(idx, values[i]);
+                    target.getSelectionModel().addSelectionInterval(idx, idx);
+                }
 
-                model.insertRow(idx, values[i]);
-
-                target.getSelectionModel().addSelectionInterval(idx, idx);
             }
+
             return true;
         } catch (Exception ufe) {
             ufe.printStackTrace();

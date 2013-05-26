@@ -17,10 +17,9 @@ import java.util.Map;
  *
  * @author dlaub
  */
-public class JobPackage implements Iterable<Field>{
-    
-    private List<Field> m_JobPackage;
+public class JobPackage implements Iterable<Field> {
 
+    private List<Field> m_JobPackage;
     public String jobNum;       //Contained in csv
     public String client;       //Contained in csv
     public String jobName;      //Contained in csv
@@ -61,8 +60,7 @@ public class JobPackage implements Iterable<Field>{
         jobNum = dBoo.rowSet.getString("jobNum");
         client = dBoo.rowSet.getString("client");
         jobName = dBoo.rowSet.getString("jobName");
-        pkgName = 
-                p.pkgName;
+        pkgName = p.pkgName;
         mailDate = p.mailDate;
         status = p.status;
         size = p.size;
@@ -73,9 +71,9 @@ public class JobPackage implements Iterable<Field>{
         programmer = dBoo.rowSet.getString("programmer");
         id = dBoo.rowSet.getInt("id");
         queuePos = p.queuePos;
-        
+
         Field fieldlist[] = this.getClass().getFields();
-        m_JobPackage =  Arrays.asList(fieldlist);
+        m_JobPackage = Arrays.asList(fieldlist);
 
     }
     ////////////////////////////////////////////////////////////////////////////

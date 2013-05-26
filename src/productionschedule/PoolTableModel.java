@@ -20,7 +20,8 @@ class PoolTableModel extends AbstractTableModel {
     private ArrayList datalist = new ArrayList();
     protected Vector dataVector;
     protected Vector columnIdentifiers;
-    public Boolean stop = false;
+    public static Boolean stop = false;
+    private boolean stopper = stop;
 
     private static Vector newVector(int size) {
         Vector v = new Vector(size);
@@ -60,7 +61,7 @@ class PoolTableModel extends AbstractTableModel {
     ////////////////////////////////////////////////////////////////////////
 
     public int getColumnCount() {
-        Field[] fieldList = datalist.get(0).getClass().getDeclaredFields();
+        Field[] fieldList = datalist.get(0).getClass().getFields();
         return fieldList.length;
     }
     ////////////////////////////////////////////////////////////////////////
@@ -81,12 +82,13 @@ class PoolTableModel extends AbstractTableModel {
     ////////////////////////////////////////////////////////////////////////
 
     public String getColumnName(int col) {
-        Field[] fieldList = datalist.get(0).getClass().getDeclaredFields();
+        Field[] fieldList = datalist.get(0).getClass().getFields();
         return fieldList[col].getName();
     }
     ////////////////////////////////////////////////////////////////////////
 
     public Object getValueAt(int row, int col) {
+
         Object job;
         Vector v = new Vector();
         //v.add(stop);
