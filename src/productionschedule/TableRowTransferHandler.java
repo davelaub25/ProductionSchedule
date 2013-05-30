@@ -42,12 +42,33 @@ class TableRowTransferHandler extends TransferHandler {
     protected Transferable createTransferable(JComponent c) {
         source = c;
         JTable table = (JTable) c;
-        PoolTableModel model = (PoolTableModel) table.getModel();
-        ArrayList<Object> list = new ArrayList<Object>();
-        for (int i : rows = table.getSelectedRows()) {
-            list.add(model.getDataVector().elementAt(i));
+        if (table.getModel().getClass().getSimpleName().equals("PoolTableModel")) {
+            System.out.println("CreateTransferable: PoolTableModel Found");
+            PoolTableModel model = (PoolTableModel) table.getModel();
+            ArrayList<Object> list = new ArrayList<Object>();
+            for (int i : rows = table.getSelectedRows()) {
+                list.add(model.getDataVector().elementAt(i));
+            }
+            transferedObjects = list.toArray();
+        } else if (table.getModel().getClass().getSimpleName().equals("PrinterTableModel")) {
+            System.out.println("CreateTransferable: PrinterTableModel Found");
+            PrinterTableModel model = (PrinterTableModel) table.getModel();
+            ArrayList<Object> list = new ArrayList<Object>();
+            for (int i : rows = table.getSelectedRows()) {
+                list.add(model.getDataVector().elementAt(i));
+            }
+            transferedObjects = list.toArray();
+        } else if (table.getModel().getClass().getSimpleName().equals("JobTableModel")) {
+            System.out.println("CreateTransferable: JobTableModel Found");
+            JobTableModel model = (JobTableModel) table.getModel();
+            ArrayList<Object> list = new ArrayList<Object>();
+            for (int i : rows = table.getSelectedRows()) {
+                list.add(model.getDataVector().elementAt(i));
+            }
+            transferedObjects = list.toArray();
         }
-        transferedObjects = list.toArray();
+
+
         return new DataHandler(transferedObjects, localObjectFlavor.getMimeType());
     }
 
@@ -62,28 +83,28 @@ class TableRowTransferHandler extends TransferHandler {
 
     @Override
     public int getSourceActions(JComponent c) {
-        return COPY_OR_MOVE;
+        return MOVE;
     }
 
     @Override
     public boolean importData(TransferHandler.TransferSupport info) {
         JTable target = (JTable) info.getComponent();
+        target.getRowCount();
         JTable.DropLocation dl = (JTable.DropLocation) info.getDropLocation();
-        DefaultTableModel tempModel = (DefaultTableModel) target.getModel();
+        //DefaultTableModel tempModel = (DefaultTableModel) target.getModel();
 
 
         int index = dl.getRow();
-        int max = tempModel.getRowCount();
+        int max = target.getRowCount();
         if (index < 0 || index > max) {
             index = max;
         }
         addIndex = index;
-        PoolTableModel.stop = true;
+        PrinterTableModel.stop = true;
         target.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         try {
             Object[] values = (Object[]) info.getTransferable().getTransferData(localObjectFlavor);
-
-
+            addCount = values.length;
             if (source != target) {
                 addCount = values.length;
             }
@@ -91,23 +112,27 @@ class TableRowTransferHandler extends TransferHandler {
                 JTable sourceTable = (JTable) source;
                 JTable targetTable = (JTable) info.getComponent();
                 if (targetTable.getModel().getClass().getSimpleName().equals("PrinterTableModel") && sourceTable.getModel().getClass().getSimpleName().equals("PoolTableModel")) {
+                    System.out.println("ImportData: PoolTableModel to PrinterTableModel Found");
                     PrinterTableModel model = (PrinterTableModel) target.getModel();
                     JobPackage jP = new JobPackage((Package) values[i], dbo);
                     int idx = index++;
-                    model.insertRow(idx, values[i]);
+                    model.insertRow(idx, jP);
                     target.getSelectionModel().addSelectionInterval(idx, idx);
-                } else if (targetTable.getModel().getClass().getSimpleName().equals("PoolTableModel") && sourceTable.getModel().getClass().getSimpleName().equals("PoolTableModel")) {
+                } else if (targetTable.getModel().getClass().getSimpleName().equals("PoolTableModel") && sourceTable.getModel().getClass().getSimpleName().equals("PrinterTableModel")) {
+                    System.out.println("ImportData: PrinterTableModel to PoolTableModel Found");
                     PoolTableModel model = (PoolTableModel) target.getModel();
                     Package p = new Package((JobPackage) values[i]);
                     int idx = index++;
-                    model.insertRow(idx, values[i]);
+                    model.insertRow(idx, p);
                     target.getSelectionModel().addSelectionInterval(idx, idx);
                 } else if (target.getModel().getClass().getSimpleName().equals("PoolTableModel")) {
+                    System.out.println("ImportData: PoolTableModel to PoolTableModel Found");
                     PoolTableModel model = (PoolTableModel) target.getModel();
                     int idx = index++;
                     model.insertRow(idx, values[i]);
                     target.getSelectionModel().addSelectionInterval(idx, idx);
                 } else if (target.getModel().getClass().getSimpleName().equals("PrinterTableModel")) {
+                    System.out.println("ImportData: PrinterTableModel to PrinterTableModel Found");
                     PrinterTableModel model = (PrinterTableModel) target.getModel();
                     int idx = index++;
                     model.insertRow(idx, values[i]);
@@ -132,15 +157,41 @@ class TableRowTransferHandler extends TransferHandler {
         if (remove && rows != null) {
             JTable table = (JTable) src;
             src.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-            PoolTableModel model = (PoolTableModel) table.getModel();
-            if (addCount > 0) {
-                for (int i = 0; i < rows.length; i++) {
-                    //if(rows[i]>=addIndex) { rows[i] += addCount; }
+
+            if (table.getModel().getClass().getSimpleName().equals("PoolTableModel")) {
+                PoolTableModel model = (PoolTableModel) table.getModel();
+                if (addCount > 0) {
+                    for (int i = 0; i < rows.length; i++) {
+                        if (rows[i] >= addIndex) {
+                            rows[i] += addCount;
+                        }
+                    }
+                }
+                for (int i = rows.length - 1; i >= 0; i--) {
+                    model.removeRow(rows[i]);
+                }
+            } else if (table.getModel().getClass().getSimpleName().equals("PrinterTableModel")) {
+                PrinterTableModel model = (PrinterTableModel) table.getModel();
+                if (addCount > 0) {
+                    for (int i = 0; i < rows.length; i++) {
+                        //if(rows[i]>=addIndex) { rows[i] += addCount; }
+                    }
+                }
+                for (int i = rows.length - 1; i >= 0; i--) {
+                    model.removeRow(rows[i]);
+                }
+            } else if (table.getModel().getClass().getSimpleName().equals("JobTableModel")) {
+                JobTableModel model = (JobTableModel) table.getModel();
+                if (addCount > 0) {
+                    for (int i = 0; i < rows.length; i++) {
+                        //if(rows[i]>=addIndex) { rows[i] += addCount; }
+                    }
+                }
+                for (int i = rows.length - 1; i >= 0; i--) {
+                    model.removeRow(rows[i]);
                 }
             }
-            for (int i = rows.length - 1; i >= 0; i--) {
-                model.removeRow(rows[i]);
-            }
+
         }
         rows = null;
         addCount = 0;
