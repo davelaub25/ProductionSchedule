@@ -104,8 +104,8 @@ class TableRowTransferHandler extends TransferHandler {
         target.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         try {
             Object[] values = (Object[]) info.getTransferable().getTransferData(localObjectFlavor);
-            addCount = values.length;
-            if (source != target) {
+            //addCount = values.length;
+            if (source == target) {
                 addCount = values.length;
             }
             for (int i = 0; i < values.length; i++) {
@@ -174,7 +174,9 @@ class TableRowTransferHandler extends TransferHandler {
                 PrinterTableModel model = (PrinterTableModel) table.getModel();
                 if (addCount > 0) {
                     for (int i = 0; i < rows.length; i++) {
-                        //if(rows[i]>=addIndex) { rows[i] += addCount; }
+                        if (rows[i] >= addIndex) {
+                            rows[i] += addCount;
+                        }
                     }
                 }
                 for (int i = rows.length - 1; i >= 0; i--) {
@@ -184,7 +186,9 @@ class TableRowTransferHandler extends TransferHandler {
                 JobTableModel model = (JobTableModel) table.getModel();
                 if (addCount > 0) {
                     for (int i = 0; i < rows.length; i++) {
-                        //if(rows[i]>=addIndex) { rows[i] += addCount; }
+                        if (rows[i] >= addIndex) {
+                            rows[i] += addCount;
+                        }
                     }
                 }
                 for (int i = rows.length - 1; i >= 0; i--) {

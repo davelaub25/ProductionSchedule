@@ -15,10 +15,14 @@ import java.util.TooManyListenersException;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.DropMode;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.TransferHandler;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import static productionschedule.ProductionSchedule.importHandler;
@@ -32,6 +36,8 @@ public class UI extends javax.swing.JFrame {
     private DefaultTableModel tableModel;
     private JTable table;
     public ArrayList jobs;
+    public JTable jtmPool1;
+    public DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched", "dlaub25_fmi", "admin");
 
     //public static Job j = new Job(1, "A", "B", "C", "D", "E", 2);
     /**
@@ -40,7 +46,6 @@ public class UI extends javax.swing.JFrame {
     public UI() throws TooManyListenersException, ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException {
         initComponents();
 
-        DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched", "dlaub25_fmi", "admin");
         String query = "SELECT * FROM jobs";
         DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
         int columnCount = dboo.rowSet.getMetaData().getColumnCount();
@@ -56,9 +61,12 @@ public class UI extends javax.swing.JFrame {
         AbstractTableModel ctm = new PrinterTableModel(jP);
 
 
-        JTable jtmPool1 = new JTable(jtm);
+        jtmPool1 = new JTable(jtm);
         JTable jtmPool2 = new JTable(ptm);
         JTable jtmPool3 = new JTable(ctm);
+
+        jtmPool1.getSelectionModel().addListSelectionListener(new RowSelectedListener());
+        jtmPool1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         TransferHandler jtmHandler = new TableRowTransferHandler();
 
@@ -99,6 +107,7 @@ public class UI extends javax.swing.JFrame {
         bonniePane = new javax.swing.JScrollPane();
         clydePane = new javax.swing.JScrollPane();
         ocePane = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
         jSeparator1 = new javax.swing.JSeparator();
         refreshButton = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
@@ -119,6 +128,19 @@ public class UI extends javax.swing.JFrame {
         clydePane.setPreferredSize(new java.awt.Dimension(100, 200));
 
         ocePane.setPreferredSize(new java.awt.Dimension(100, 200));
+
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        ocePane.setViewportView(jTable1);
 
         refreshButton.setText("Refresh List");
         refreshButton.addActionListener(new java.awt.event.ActionListener() {
@@ -259,7 +281,7 @@ public class UI extends javax.swing.JFrame {
 //        } catch (IllegalArgumentException ex) {
 //            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
 //        } catch (IllegalAccessException ex) {
-//            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+//                Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
 //        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -271,7 +293,7 @@ public class UI extends javax.swing.JFrame {
     }//GEN-LAST:event_refreshButtonActionPerformed
 
     /**
-     * @param args the command line arguments
+     * * @param args the command line arguments
      */
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -318,6 +340,7 @@ public class UI extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JTable jTable1;
     private javax.swing.JScrollPane jobPoolPane;
     private javax.swing.JScrollPane ocePane;
     private javax.swing.JScrollPane pkgPoolPane;
@@ -338,5 +361,17 @@ public class UI extends javax.swing.JFrame {
         v.add(anArray[i]);
 
         return v;
+    }
+
+    class RowSelectedListener implements ListSelectionListener {
+
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+            DefaultListSelectionModel dlsm = (DefaultListSelectionModel) e.getSource();
+            System.out.println("Row Currently selected: " + dlsm.getLeadSelectionIndex());
+            //PoolTableModel ptm = new PoolTableModel
+            //jtmPo
+            //ol1.getModel().
+        }
     }
 }
