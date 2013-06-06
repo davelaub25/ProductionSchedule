@@ -5,11 +5,7 @@
 package productionschedule;
 
 import java.awt.Frame;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.lang.reflect.Field;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.TooManyListenersException;
 import java.util.Vector;
@@ -36,7 +32,9 @@ public class UI extends javax.swing.JFrame {
     private DefaultTableModel tableModel;
     private JTable table;
     public ArrayList jobs;
-    public JTable jtmPool1;
+    public JTable jobPoolTable;
+    public JTable packagePoolTable;
+    public TransferHandler jtmHandler = new TableRowTransferHandler();
     public DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched", "dlaub25_fmi", "admin");
 
     //public static Job j = new Job(1, "A", "B", "C", "D", "E", 2);
@@ -61,32 +59,32 @@ public class UI extends javax.swing.JFrame {
         AbstractTableModel ctm = new PrinterTableModel(jP);
 
 
-        jtmPool1 = new JTable(jtm);
-        JTable jtmPool2 = new JTable(ptm);
+        jobPoolTable = new JTable(jtm);
+        packagePoolTable = new JTable(ptm);
         JTable jtmPool3 = new JTable(ctm);
 
-        jtmPool1.getSelectionModel().addListSelectionListener(new RowSelectedListener());
-        jtmPool1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        jobPoolTable.getSelectionModel().addListSelectionListener(new RowSelectedListener());
+        jobPoolTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        TransferHandler jtmHandler = new TableRowTransferHandler();
 
-        jtmPool1.setDragEnabled(false);
-        jtmPool1.setDropMode(DropMode.INSERT_ROWS);
-        jtmPool1.setTransferHandler(jtmHandler);
-        jtmPool2.setDragEnabled(true);
-        jtmPool2.setDropMode(DropMode.INSERT_ROWS);
-        jtmPool2.setTransferHandler(jtmHandler);
+
+        jobPoolTable.setDragEnabled(false);
+        jobPoolTable.setDropMode(DropMode.INSERT_ROWS);
+        jobPoolTable.setTransferHandler(jtmHandler);
+        packagePoolTable.setDragEnabled(true);
+        packagePoolTable.setDropMode(DropMode.INSERT_ROWS);
+        packagePoolTable.setTransferHandler(jtmHandler);
         jtmPool3.setDragEnabled(true);
         jtmPool3.setDropMode(DropMode.INSERT_ROWS);
         jtmPool3.setTransferHandler(jtmHandler);
 
 
-        jobPoolPane.setViewportView(jtmPool1);
-        pkgPoolPane.setViewportView(jtmPool2);
+        jobPoolPane.setViewportView(jobPoolTable);
+        pkgPoolPane.setViewportView(packagePoolTable);
         bonniePane.setViewportView(jtmPool3);
 
-        jtmPool1.setFillsViewportHeight(true);
-        jtmPool2.setFillsViewportHeight(true);
+        jobPoolTable.setFillsViewportHeight(true);
+        packagePoolTable.setFillsViewportHeight(true);
         jtmPool3.setFillsViewportHeight(true);
 
     }
@@ -281,8 +279,8 @@ public class UI extends javax.swing.JFrame {
 //        } catch (IllegalArgumentException ex) {
 //            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
 //        } catch (IllegalAccessException ex) {
-//                Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+//                    Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+//            }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void testButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testButtonActionPerformed
@@ -369,9 +367,16 @@ public class UI extends javax.swing.JFrame {
         public void valueChanged(ListSelectionEvent e) {
             DefaultListSelectionModel dlsm = (DefaultListSelectionModel) e.getSource();
             System.out.println("Row Currently selected: " + dlsm.getLeadSelectionIndex());
-            //PoolTableModel ptm = new PoolTableModel
-            //jtmPo
-            //ol1.getModel().
+            System.out.println("Class: " + e.getClass().toString());
+            JobTableModel jtm = (JobTableModel) jobPoolTable.getModel();
+            Job tempJob = (Job) jtm.dataVector.get(dlsm.getLeadSelectionIndex());
+            AbstractTableModel tempPoolModel = new PoolTableModel(tempJob.packages);
+            packagePoolTable = new JTable(tempPoolModel);
+            pkgPoolPane.setViewportView(packagePoolTable);
+            packagePoolTable.setFillsViewportHeight(true);
+            packagePoolTable.setDragEnabled(true);
+            packagePoolTable.setDropMode(DropMode.INSERT_ROWS);
+            packagePoolTable.setTransferHandler(jtmHandler);
         }
     }
 }
