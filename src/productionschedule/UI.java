@@ -5,6 +5,11 @@
 package productionschedule;
 
 import java.awt.Frame;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.TooManyListenersException;
@@ -19,6 +24,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.TransferHandler;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import static productionschedule.ProductionSchedule.importHandler;
@@ -54,39 +61,60 @@ public class UI extends javax.swing.JFrame {
         Package p = (Package) j.packages.get(0);
         JobPackage jP = new JobPackage(p, dbo);
 
+
+
         AbstractTableModel jtm = new JobTableModel(jobs);
         AbstractTableModel ptm = new PoolTableModel(packList);
+        AbstractTableModel btm = new PrinterTableModel(jP);
         AbstractTableModel ctm = new PrinterTableModel(jP);
+        AbstractTableModel otm = new PrinterTableModel(jP);
 
 
         jobPoolTable = new JTable(jtm);
         packagePoolTable = new JTable(ptm);
-        JTable jtmPool3 = new JTable(ctm);
+        JTable bonniePool = new JTable(btm);
+        JTable clydePool = new JTable(ctm);
+        JTable ocePool = new JTable(otm);
 
         jobPoolTable.getSelectionModel().addListSelectionListener(new RowSelectedListener());
         jobPoolTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-
-
+        
+        
         jobPoolTable.setDragEnabled(false);
         jobPoolTable.setDropMode(DropMode.INSERT_ROWS);
         jobPoolTable.setTransferHandler(jtmHandler);
         packagePoolTable.setDragEnabled(true);
         packagePoolTable.setDropMode(DropMode.INSERT_ROWS);
         packagePoolTable.setTransferHandler(jtmHandler);
-        jtmPool3.setDragEnabled(true);
-        jtmPool3.setDropMode(DropMode.INSERT_ROWS);
-        jtmPool3.setTransferHandler(jtmHandler);
-
+        bonniePool.setDragEnabled(true);
+        bonniePool.setDropMode(DropMode.INSERT_ROWS);
+        bonniePool.setTransferHandler(jtmHandler);
+        BonnieModelListener bml = new BonnieModelListener();
+        bonniePool.getModel().addTableModelListener(bml);
+        clydePool.setDragEnabled(true);
+        clydePool.setDropMode(DropMode.INSERT_ROWS);
+        clydePool.setTransferHandler(jtmHandler);
+        ClydeModelListener cml = new ClydeModelListener();
+        clydePool.getModel().addTableModelListener(cml);
+        ocePool.setDragEnabled(true);
+        ocePool.setDropMode(DropMode.INSERT_ROWS);
+        ocePool.setTransferHandler(jtmHandler);
+        OceModelListener oml = new OceModelListener();
+        ocePool.getModel().addTableModelListener(oml);
 
         jobPoolPane.setViewportView(jobPoolTable);
         pkgPoolPane.setViewportView(packagePoolTable);
-        bonniePane.setViewportView(jtmPool3);
+        bonniePane.setViewportView(bonniePool);
+        clydePane.setViewportView(clydePool);
+        ocePane.setViewportView(ocePool);
 
         jobPoolTable.setFillsViewportHeight(true);
         packagePoolTable.setFillsViewportHeight(true);
-        jtmPool3.setFillsViewportHeight(true);
-
+        bonniePool.setFillsViewportHeight(true);
+        clydePool.setFillsViewportHeight(true);
+        ocePool.setFillsViewportHeight(true);
+        
     }
 
     /**
@@ -105,12 +133,18 @@ public class UI extends javax.swing.JFrame {
         bonniePane = new javax.swing.JScrollPane();
         clydePane = new javax.swing.JScrollPane();
         ocePane = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
         jSeparator1 = new javax.swing.JSeparator();
         refreshButton = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         jPanel3 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
         jButton1 = new javax.swing.JButton();
         testButton = new javax.swing.JButton();
 
@@ -127,6 +161,92 @@ public class UI extends javax.swing.JFrame {
 
         ocePane.setPreferredSize(new java.awt.Dimension(100, 200));
 
+        refreshButton.setText("Refresh List");
+        refreshButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                refreshButtonActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabel1.setText("Clyde");
+
+        jLabel2.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabel2.setText("Bonnie");
+
+        jLabel3.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabel3.setText("Oce");
+
+        jLabel4.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabel4.setText("Jobs");
+
+        jLabel5.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        jLabel5.setText("Packages");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator1)
+                    .addComponent(clydePane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(ocePane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(bonniePane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jobPoolPane, javax.swing.GroupLayout.PREFERRED_SIZE, 483, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel4))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel5)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(pkgPoolPane, javax.swing.GroupLayout.DEFAULT_SIZE, 908, Short.MAX_VALUE)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1)
+                            .addComponent(refreshButton))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(jLabel5))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jobPoolPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(pkgPoolPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(bonniePane, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(clydePane, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(11, 11, 11)
+                .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(ocePane, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(refreshButton)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jTabbedPane1.addTab("tab1", jPanel1);
+
+        jPanel3.setMinimumSize(new java.awt.Dimension(50, 1200));
+
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -138,68 +258,23 @@ public class UI extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        ocePane.setViewportView(jTable1);
-
-        refreshButton.setText("Refresh List");
-        refreshButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                refreshButtonActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator1)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jobPoolPane, javax.swing.GroupLayout.PREFERRED_SIZE, 483, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(pkgPoolPane, javax.swing.GroupLayout.DEFAULT_SIZE, 908, Short.MAX_VALUE))
-                    .addComponent(clydePane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(ocePane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(bonniePane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(refreshButton)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jobPoolPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pkgPoolPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(bonniePane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(clydePane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(ocePane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 217, Short.MAX_VALUE)
-                .addComponent(refreshButton)
-                .addContainerGap())
-        );
-
-        jTabbedPane1.addTab("tab1", jPanel1);
-
-        jPanel3.setMinimumSize(new java.awt.Dimension(50, 1200));
+        jScrollPane1.setViewportView(jTable1);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1325, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(158, 158, 158)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(715, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1272, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(22, 22, 22)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(848, Short.MAX_VALUE))
         );
 
         jScrollPane2.setViewportView(jPanel3);
@@ -238,7 +313,7 @@ public class UI extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 1066, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 954, Short.MAX_VALUE)
                 .addContainerGap())
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(44, 44, 44)
@@ -332,9 +407,15 @@ public class UI extends javax.swing.JFrame {
     private javax.swing.JScrollPane bonniePane;
     private javax.swing.JScrollPane clydePane;
     private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JTabbedPane jTabbedPane1;
@@ -361,6 +442,34 @@ public class UI extends javax.swing.JFrame {
         return v;
     }
 
+    class TargetListener implements DropTargetListener {
+
+        @Override
+        public void dragEnter(DropTargetDragEvent dtde) {
+            System.out.println("DragEnter");
+        }
+
+        @Override
+        public void dragOver(DropTargetDragEvent dtde) {
+            System.out.println("DragOver");
+        }
+
+        @Override
+        public void dropActionChanged(DropTargetDragEvent dtde) {
+            System.out.println("DropActionChanged");
+        }
+
+        @Override
+        public void dragExit(DropTargetEvent dte) {
+            System.out.println("DragExit");
+        }
+
+        @Override
+        public void drop(DropTargetDropEvent dtde) {
+            System.out.println("Drop");
+        }
+    }
+
     class RowSelectedListener implements ListSelectionListener {
 
         @Override
@@ -377,6 +486,111 @@ public class UI extends javax.swing.JFrame {
             packagePoolTable.setDragEnabled(true);
             packagePoolTable.setDropMode(DropMode.INSERT_ROWS);
             packagePoolTable.setTransferHandler(jtmHandler);
+        }
+    }
+
+    class BonnieModelListener implements TableModelListener {
+
+        @Override
+        public void tableChanged(TableModelEvent e) {
+            PrinterTableModel ptm = (PrinterTableModel) e.getSource();
+            int firstRow = e.getFirstRow();
+            int lastRow = e.getLastRow();
+            int index = e.getColumn();
+            System.out.println("PrinterTableModelHasChanged!");
+            switch (e.getType()) {
+                case TableModelEvent.INSERT:
+                    for (int i = 0; i <= ptm.getRowCount()-1; i++) {
+                        System.out.println("Number Of Rows: " + ptm.getRowCount());
+                        String s = "B-" + (i+1);
+                        System.out.println("Row Inserted");
+                        System.out.println("First Row: " + firstRow + " Last Row: " + lastRow);
+                        ptm.setCellValueAt(s, i, 12);
+                    }
+                    break;
+                case TableModelEvent.UPDATE:
+                    System.out.println("Row Updated");
+                    break;
+                case TableModelEvent.DELETE:
+                    for (int i = 0; i <= ptm.getRowCount()-1; i++) {
+                        System.out.println("Number Of Rows: " + ptm.getRowCount());
+                        String s = "B-" + (i+1);
+                        System.out.println("Row Deleted");
+                        System.out.println("First Row: " + firstRow + " Last Row: " + lastRow);
+                        ptm.setCellValueAt(s, i, 12);
+                    }
+                    break;
+            }
+        }
+    }
+
+    class ClydeModelListener implements TableModelListener {
+
+        @Override
+        public void tableChanged(TableModelEvent e) {
+            PrinterTableModel ptm = (PrinterTableModel) e.getSource();
+            int firstRow = e.getFirstRow();
+            int lastRow = e.getLastRow();
+            int index = e.getColumn();
+            System.out.println("PrinterTableModelHasChanged!");
+            switch (e.getType()) {
+                case TableModelEvent.INSERT:
+                    for (int i = 0; i <= ptm.getRowCount()-1; i++) {
+                        System.out.println("Number Of Rows: " + ptm.getRowCount());
+                        String s = "C-" + (i+1);
+                        System.out.println("Row Inserted");
+                        System.out.println("First Row: " + firstRow + " Last Row: " + lastRow);
+                        ptm.setCellValueAt(s, i, 12);
+                    }
+                    break;
+                case TableModelEvent.UPDATE:
+                    System.out.println("Row Updated");
+                    break;
+                case TableModelEvent.DELETE:
+                    for (int i = 0; i <= ptm.getRowCount()-1; i++) {
+                        System.out.println("Number Of Rows: " + ptm.getRowCount());
+                        String s = "C-" + (i+1);
+                        System.out.println("Row Deleted");
+                        System.out.println("First Row: " + firstRow + " Last Row: " + lastRow);
+                        ptm.setCellValueAt(s, i, 12);
+                    }
+                    break;
+            }
+        }
+    }
+
+    class OceModelListener implements TableModelListener {
+
+        @Override
+        public void tableChanged(TableModelEvent e) {
+            PrinterTableModel ptm = (PrinterTableModel) e.getSource();
+            int firstRow = e.getFirstRow();
+            int lastRow = e.getLastRow();
+            int index = e.getColumn();
+            System.out.println("PrinterTableModelHasChanged!");
+            switch (e.getType()) {
+                case TableModelEvent.INSERT:
+                    for (int i = 0; i <= ptm.getRowCount()-1; i++) {
+                        System.out.println("Number Of Rows: " + ptm.getRowCount());
+                        String s = "O-" + (i+1);
+                        System.out.println("Row Inserted");
+                        System.out.println("First Row: " + firstRow + " Last Row: " + lastRow);
+                        ptm.setCellValueAt(s, i, 12);
+                    }
+                    break;
+                case TableModelEvent.UPDATE:
+                    System.out.println("Row Updated");
+                    break;
+                case TableModelEvent.DELETE:
+                    for (int i = 0; i <= ptm.getRowCount()-1; i++) {
+                        System.out.println("Number Of Rows: " + ptm.getRowCount());
+                        String s = "O-" + (i+1);
+                        System.out.println("Row Deleted");
+                        System.out.println("First Row: " + firstRow + " Last Row: " + lastRow);
+                        ptm.setCellValueAt(s, i, 12);
+                    }
+                    break;
+            }
         }
     }
 }

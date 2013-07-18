@@ -70,7 +70,7 @@ class PrinterTableModel extends AbstractTableModel {
         try {
             return getValueAt(0, c).getClass();
         } catch (NullPointerException e) {
-            System.out.println("INFO: Column class of type null found.  Defaulting to String class.\n");
+            //System.out.println("INFO: Column class of type null found.  Defaulting to String class.\n");
             return String.class;
         }
     }
@@ -118,7 +118,7 @@ class PrinterTableModel extends AbstractTableModel {
     ////////////////////////////////////////////////////////////////////////
 
     public boolean isCellEditable(int row, int col) {
-        return false;
+        return true;
     }
     ////////////////////////////////////////////////////////////////////////
 
@@ -212,8 +212,30 @@ class PrinterTableModel extends AbstractTableModel {
      * data can change.
      */
     public void setValueAt(Object aValue, int row, int column) {
-        Vector rowVector = (Vector) dataVector.elementAt(row);
-        rowVector.setElementAt(aValue, column);
+        Object rowObject = (Object) dataVector.elementAt(row);
+        Class cls = rowObject.getClass();
+        Field fieldlist[] = cls.getFields();
+        Vector v = new Vector();
+        for (int i = 0; i < fieldlist.length; i++) {
+            if(i ==  column){
+                String names = fieldlist[i].toString();
+                String[] fieldName = names.split("\\.");    // Splits the object name string on periods
+                String lastName = fieldName[fieldName.length - 1];    // Pulls the position of the string which contains the property name
+                Field propertyField;
+                try {
+                    propertyField = rowObject.getClass().getDeclaredField(lastName);
+                    propertyField.set(rowObject, aValue);
+                } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+                    Logger.getLogger(PrinterTableModel.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        //v.setElementAt(aValue, column);
+        fireTableCellUpdated(row, column);
+    }
+    public void setCellValueAt(Object aValue, int row, int column) {
+        JobPackage rowObject = (JobPackage) dataVector.elementAt(row);
+        rowObject.queuePos = (String) aValue;
         fireTableCellUpdated(row, column);
     }
 

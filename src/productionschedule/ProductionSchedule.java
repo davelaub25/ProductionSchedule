@@ -185,6 +185,29 @@ public class ProductionSchedule {
         //End crazy ass code
 
     }
+   /////////////////////////////////////////////////////////////////////////////
+    public static ArrayList exportHandler(JobPackage jp) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        String insertQuery = "INSERT INTO `dlaub25_lasersched`.`jobs` "
+                + "(`jobNum`, `client`, `jobName`, `status`, `programmer`, `id`) "
+                + "VALUES (?, ?, ?, ?, ?, ?);";
+        //Crazy ass code to emulate a for each loop
+        Class cls = Class.forName("productionschedule.JobPackage");
+        Field fieldlist[] = cls.getDeclaredFields();
+        ArrayList queryValues = new ArrayList();
+        for (int i = 0; i < fieldlist.length; i++) {
+            if (!fieldlist[i].toString().equals("public productionschedule.Package[] productionschedule.Job.packages")) {
+                String names = fieldlist[i].toString();
+                String[] fieldName = names.split("\\.");    // Splits the object name string on periods
+                String lastName = fieldName[fieldName.length - 1];    // Pulls the position of the string which contains the property name
+                Field propertyField = jp.getClass().getDeclaredField(lastName);
+                String propertyValue = propertyField.get(jp).toString();
+                queryValues.add(propertyValue);
+            }
+        }
+        return queryValues;
+        //End crazy ass code
+
+    }
     ////////////////////////////////////////////////////////////////////////////
 
     public static ArrayList importHandler(DatabaseOutputObject exDBOO) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException {
@@ -213,6 +236,10 @@ public class ProductionSchedule {
         File f = new File("C:\\LASER\\csv Reports\\65395 Laser Production Count Sheet.csv");
         CsvReader newReader = new CsvReader("C:\\LASER\\csv Reports\\65268 Laser Production Count Sheet.csv");
         csvToJob(f);
+    }
+    
+    public static ArrayList pkgToSql(){
+        return null;
     }
     ////////////////////////////////////////////////////////////////////////////
 //    public static JTable buildJobTable(ArrayList jobs){

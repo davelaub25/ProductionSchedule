@@ -70,7 +70,7 @@ class PoolTableModel extends AbstractTableModel {
         try {
             return getValueAt(0, c).getClass();
         } catch (NullPointerException e) {
-            System.out.println("INFO: Column class of type null found.  Defaulting to String class.\n");
+            //System.out.println("INFO: Column class of type null found.  Defaulting to String class.\n");
             return String.class;
         }
     }
@@ -118,7 +118,7 @@ class PoolTableModel extends AbstractTableModel {
     ////////////////////////////////////////////////////////////////////////
 
     public boolean isCellEditable(int row, int col) {
-        return false;
+        return true;
     }
     ////////////////////////////////////////////////////////////////////////
 
