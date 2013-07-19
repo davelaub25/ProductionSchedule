@@ -22,8 +22,8 @@ public class Package {
     public int pages;
     public int nUp;       // Contained in CSV
     public String printer;
-    public Double ert;    // Contained in CSV
     public String queuePos;
+    public Double ert;    // Contained in CSV
     public int id;
 
     public Package(String n, Date m, String st, int si, int u, Double e, String qp, int i) {

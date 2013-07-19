@@ -39,8 +39,11 @@ public class UI extends javax.swing.JFrame {
     private DefaultTableModel tableModel;
     private JTable table;
     public ArrayList jobs;
-    public JTable jobPoolTable;
-    public JTable packagePoolTable;
+    public static JTable jobPoolTable;
+    public static JTable packagePoolTable;
+    public static JTable bonniePool;
+    public static JTable clydePool;
+    public static JTable ocePool;
     public TransferHandler jtmHandler = new TableRowTransferHandler();
     public DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched", "dlaub25_fmi", "admin");
 
@@ -72,9 +75,9 @@ public class UI extends javax.swing.JFrame {
 
         jobPoolTable = new JTable(jtm);
         packagePoolTable = new JTable(ptm);
-        JTable bonniePool = new JTable(btm);
-        JTable clydePool = new JTable(ctm);
-        JTable ocePool = new JTable(otm);
+        bonniePool = new JTable(btm);
+        clydePool = new JTable(ctm);
+        ocePool = new JTable(otm);
 
         jobPoolTable.getSelectionModel().addListSelectionListener(new RowSelectedListener());
         jobPoolTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -140,6 +143,8 @@ public class UI extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
+        commitButton = new javax.swing.JButton();
+        Test = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         jPanel3 = new javax.swing.JPanel();
@@ -183,6 +188,20 @@ public class UI extends javax.swing.JFrame {
         jLabel5.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel5.setText("Packages");
 
+        commitButton.setText("Commit");
+        commitButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                commitButtonActionPerformed(evt);
+            }
+        });
+
+        Test.setText("Test");
+        Test.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                TestActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -210,7 +229,10 @@ public class UI extends javax.swing.JFrame {
                             .addComponent(jLabel2)
                             .addComponent(jLabel1)
                             .addComponent(refreshButton))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(Test)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(commitButton)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -239,8 +261,14 @@ public class UI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(ocePane, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(refreshButton)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(Test, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(refreshButton)
+                            .addComponent(commitButton))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
 
         jTabbedPane1.addTab("tab1", jPanel1);
@@ -365,6 +393,40 @@ public class UI extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_refreshButtonActionPerformed
 
+    private void commitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_commitButtonActionPerformed
+        PrinterTableModel ptm = (PrinterTableModel)bonniePool.getModel();
+        //String jobQuery = "UPDATE main SET jobNum = ?, client = ?, jobName = ?, mailDate = ?, type = ?, jobStatus = ?, notes = ?, programmer = ?, signOffs = ?, approved = ?, production = ?, platform = ?, csr = ?, printer = ?, data = ? WHERE id = ?";
+        String jobQuery = "UPDATE jobs SET jobNum=?, client=?, jobName=?, status=?, programmer=? WHERE id = ?";
+        String pkgQuery = "UPDATE packages SET pkgName =?, mailDate=?, status=?, size=?, nUp=?, printer=?, queuePos=?, ert=?, WHERE id = ?";
+        for (int i = 0; i < ptm.getRowCount(); i++) {
+            //ptm.dataVector.elementAt(0)
+        }
+        
+    }//GEN-LAST:event_commitButtonActionPerformed
+
+    private void TestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TestActionPerformed
+        try {
+            String query = "SELECT * FROM jobs LIMIT 1";
+            DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
+            int columnCount = dboo.rowSet.getMetaData().getColumnCount();
+            jobs = importHandler(dboo);
+            Job j = (Job) jobs.get(0);
+            ArrayList packList = j.packages;
+            ArrayList bonnie = new ArrayList();
+            Package p = (Package) j.packages.get(0);
+            JobPackage jP = new JobPackage(p, dbo);
+            ArrayList[] al = ProductionSchedule.exportHandler(jP);
+            for (ArrayList a : al){
+                for(Object o : a){
+                    System.out.println(o.toString());
+                }
+            }
+        } catch (ClassNotFoundException | SQLException | IllegalArgumentException | IllegalAccessException | NoSuchFieldException ex) {
+            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }//GEN-LAST:event_TestActionPerformed
+
     /**
      * * @param args the command line arguments
      */
@@ -404,8 +466,10 @@ public class UI extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton Test;
     private javax.swing.JScrollPane bonniePane;
     private javax.swing.JScrollPane clydePane;
+    private javax.swing.JButton commitButton;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -505,7 +569,7 @@ public class UI extends javax.swing.JFrame {
                         String s = "B-" + (i+1);
                         System.out.println("Row Inserted");
                         System.out.println("First Row: " + firstRow + " Last Row: " + lastRow);
-                        ptm.setCellValueAt(s, i, 12);
+                        ptm.setValueAt(s, i, 12);
                     }
                     break;
                 case TableModelEvent.UPDATE:
@@ -517,7 +581,7 @@ public class UI extends javax.swing.JFrame {
                         String s = "B-" + (i+1);
                         System.out.println("Row Deleted");
                         System.out.println("First Row: " + firstRow + " Last Row: " + lastRow);
-                        ptm.setCellValueAt(s, i, 12);
+                        ptm.setValueAt(s, i, 12);
                     }
                     break;
             }
@@ -540,7 +604,7 @@ public class UI extends javax.swing.JFrame {
                         String s = "C-" + (i+1);
                         System.out.println("Row Inserted");
                         System.out.println("First Row: " + firstRow + " Last Row: " + lastRow);
-                        ptm.setCellValueAt(s, i, 12);
+                        ptm.setValueAt(s, i, 12);
                     }
                     break;
                 case TableModelEvent.UPDATE:
@@ -552,7 +616,7 @@ public class UI extends javax.swing.JFrame {
                         String s = "C-" + (i+1);
                         System.out.println("Row Deleted");
                         System.out.println("First Row: " + firstRow + " Last Row: " + lastRow);
-                        ptm.setCellValueAt(s, i, 12);
+                        ptm.setValueAt(s, i, 12);
                     }
                     break;
             }
@@ -575,7 +639,7 @@ public class UI extends javax.swing.JFrame {
                         String s = "O-" + (i+1);
                         System.out.println("Row Inserted");
                         System.out.println("First Row: " + firstRow + " Last Row: " + lastRow);
-                        ptm.setCellValueAt(s, i, 12);
+                        ptm.setValueAt(s, i, 12);
                     }
                     break;
                 case TableModelEvent.UPDATE:
@@ -587,7 +651,7 @@ public class UI extends javax.swing.JFrame {
                         String s = "O-" + (i+1);
                         System.out.println("Row Deleted");
                         System.out.println("First Row: " + firstRow + " Last Row: " + lastRow);
-                        ptm.setCellValueAt(s, i, 12);
+                        ptm.setValueAt(s, i, 12);
                     }
                     break;
             }

@@ -18,7 +18,7 @@ import javax.swing.table.AbstractTableModel;
 class PrinterTableModel extends AbstractTableModel {
 
     private ArrayList datalist = new ArrayList();
-    protected Vector dataVector;
+    public Vector dataVector;
     protected Vector columnIdentifiers;
     public static Boolean stop = false;
     private boolean stopper = stop;

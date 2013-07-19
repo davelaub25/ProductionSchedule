@@ -20,6 +20,7 @@ import java.util.Map;
 import com.csvreader.CsvReader;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -164,12 +165,9 @@ public class ProductionSchedule {
     ////////////////////////////////////////////////////////////////////////////
 
     public static ArrayList exportHandler(Job j) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
-        String insertQuery = "INSERT INTO `dlaub25_lasersched`.`jobs` "
-                + "(`jobNum`, `client`, `jobName`, `status`, `programmer`, `id`) "
-                + "VALUES (?, ?, ?, ?, ?, ?);";
         //Crazy ass code to emulate a for each loop
         Class cls = Class.forName("productionschedule.Job");
-        Field fieldlist[] = cls.getDeclaredFields();
+        Field fieldlist[] = cls.getFields();
         ArrayList queryValues = new ArrayList();
         for (int i = 0; i < fieldlist.length; i++) {
             if (!fieldlist[i].toString().equals("public productionschedule.Package[] productionschedule.Job.packages")) {
@@ -186,25 +184,46 @@ public class ProductionSchedule {
 
     }
    /////////////////////////////////////////////////////////////////////////////
-    public static ArrayList exportHandler(JobPackage jp) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
-        String insertQuery = "INSERT INTO `dlaub25_lasersched`.`jobs` "
-                + "(`jobNum`, `client`, `jobName`, `status`, `programmer`, `id`) "
-                + "VALUES (?, ?, ?, ?, ?, ?);";
+    public static ArrayList[] exportHandler(JobPackage jp) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
         //Crazy ass code to emulate a for each loop
         Class cls = Class.forName("productionschedule.JobPackage");
-        Field fieldlist[] = cls.getDeclaredFields();
-        ArrayList queryValues = new ArrayList();
+        Field fieldlist[] = cls.getFields();
+        ArrayList<Field> jobFields = new ArrayList<Field>(Arrays.asList(Job.class.getFields()));
+        ArrayList<String> jobFieldNames = new ArrayList<String>();
+        ArrayList<Field> pkgFields = new ArrayList<Field>(Arrays.asList(Package.class.getFields()));
+        ArrayList<String> pkgFieldNames = new ArrayList<String>();
+        int j=0;
+        for(Field f : jobFields){
+            jobFieldNames.add(f.getName());
+            j++;
+        }
+        j=0;
+        for(Field f : pkgFields){
+            pkgFieldNames.add(f.getName());
+            j++;
+        }
+        ArrayList jobValues = new ArrayList();
+        ArrayList pkgValues = new ArrayList();
         for (int i = 0; i < fieldlist.length; i++) {
-            if (!fieldlist[i].toString().equals("public productionschedule.Package[] productionschedule.Job.packages")) {
-                String names = fieldlist[i].toString();
-                String[] fieldName = names.split("\\.");    // Splits the object name string on periods
-                String lastName = fieldName[fieldName.length - 1];    // Pulls the position of the string which contains the property name
-                Field propertyField = jp.getClass().getDeclaredField(lastName);
+            if (pkgFieldNames.contains(fieldlist[i].getName())) {
+                System.out.println("Pkg Tested True");
+                String fieldName = fieldlist[i].getName();
+                Field propertyField = jp.getClass().getField(fieldName);
                 String propertyValue = propertyField.get(jp).toString();
-                queryValues.add(propertyValue);
+                pkgValues.add(propertyValue);
+            }
+            else if (jobFieldNames.contains(fieldlist[i].getName())) {
+                System.out.println("Job Tested True");
+                String fieldName = fieldlist[i].getName();
+                Field propertyField = jp.getClass().getField(fieldName);
+                String propertyValue = propertyField.get(jp).toString();
+                jobValues.add(propertyValue);
             }
         }
-        return queryValues;
+        ArrayList[] al = new ArrayList[2];
+        al[1] = jobValues;
+        al[2] = pkgValues;
+        return al;
         //End crazy ass code
 
     }
@@ -221,6 +240,7 @@ public class ProductionSchedule {
             for (int i = 0; i < fieldlist.length; i++) {
                 if (!fieldlist[i].getName().equals("packages")) {
                     String fieldName = fieldlist[i].getName();
+                    System.out.println(fieldName);
                     System.out.println(exDBOO.rowSet.getObject(fieldName));
                     map.put(fieldName, exDBOO.rowSet.getObject(fieldName));
                 }
