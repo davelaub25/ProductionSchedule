@@ -4,6 +4,7 @@
  */
 package productionschedule;
 
+import com.mysql.jdbc.exceptions.MySQLDataException;
 import java.awt.Frame;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDragEvent;
@@ -28,7 +29,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
-import static productionschedule.ProductionSchedule.importHandler;
+import productionschedule.JobPackage;
 
 /**
  *
@@ -38,7 +39,8 @@ public class UI extends javax.swing.JFrame {
 
     private DefaultTableModel tableModel;
     private JTable table;
-    public ArrayList jobs;
+    public ArrayList<Job> jobs;
+    public ArrayList<Package> pkgs;
     public static JTable jobPoolTable;
     public static JTable packagePoolTable;
     public static JTable bonniePool;
@@ -54,23 +56,44 @@ public class UI extends javax.swing.JFrame {
     public UI() throws TooManyListenersException, ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException {
         initComponents();
 
-        String query = "SELECT * FROM jobs";
-        DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
-        int columnCount = dboo.rowSet.getMetaData().getColumnCount();
-        jobs = importHandler(dboo);
+        String jobQuery = "SELECT * FROM jobs";
+        DatabaseOutputObject jobDboo = DatabaseTools.queryDatabase(dbo, jobQuery);
+        jobs = ProductionSchedule.importHandler(jobDboo);
+        String pkgQuery = "SELECT * FROM packages";
+        DatabaseOutputObject pkgDboo = DatabaseTools.queryDatabase(dbo, pkgQuery);
+        pkgs = ProductionSchedule.pkgImportHandler(pkgDboo, Package.class);
+
+        ArrayList bonnie = new ArrayList();
+        ArrayList clyde = new ArrayList();
+        ArrayList oce = new ArrayList();
+
+        for (int i = 0; i < pkgs.size(); i++) {
+            try {
+                if (!pkgs.get(i).queuePos.isEmpty()) {
+                    if (pkgs.get(i).queuePos.startsWith("B")) {
+                        JobPackage jP = new JobPackage(pkgs.get(i), dbo);
+                        bonnie.add(jP);
+                    } else if (pkgs.get(i).queuePos.startsWith("C")) {
+                        JobPackage jP = new JobPackage(pkgs.get(i), dbo);
+                        clyde.add(jP);
+                    } else if (pkgs.get(i).queuePos.startsWith("O")) {
+                        JobPackage jP = new JobPackage(pkgs.get(i), dbo);
+                        oce.add(jP);
+                    }
+                }
+            } catch (NullPointerException ex) {
+            }
+        }
         Job j = (Job) jobs.get(0);
         ArrayList packList = j.packages;
-        ArrayList bonnie = new ArrayList();
-        Package p = (Package) j.packages.get(0);
-        JobPackage jP = new JobPackage(p, dbo);
 
 
 
         AbstractTableModel jtm = new JobTableModel(jobs);
         AbstractTableModel ptm = new PoolTableModel(packList);
-        AbstractTableModel btm = new PrinterTableModel(jP);
-        AbstractTableModel ctm = new PrinterTableModel(jP);
-        AbstractTableModel otm = new PrinterTableModel(jP);
+        AbstractTableModel btm = new PrinterTableModel(bonnie);
+        AbstractTableModel ctm = new PrinterTableModel(clyde);
+        AbstractTableModel otm = new PrinterTableModel(oce);
 
 
         jobPoolTable = new JTable(jtm);
@@ -82,8 +105,8 @@ public class UI extends javax.swing.JFrame {
         jobPoolTable.getSelectionModel().addListSelectionListener(new RowSelectedListener());
         jobPoolTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        
-        
+
+
         jobPoolTable.setDragEnabled(false);
         jobPoolTable.setDropMode(DropMode.INSERT_ROWS);
         jobPoolTable.setTransferHandler(jtmHandler);
@@ -117,7 +140,7 @@ public class UI extends javax.swing.JFrame {
         bonniePool.setFillsViewportHeight(true);
         clydePool.setFillsViewportHeight(true);
         ocePool.setFillsViewportHeight(true);
-        
+
     }
 
     /**
@@ -394,14 +417,35 @@ public class UI extends javax.swing.JFrame {
     }//GEN-LAST:event_refreshButtonActionPerformed
 
     private void commitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_commitButtonActionPerformed
-        PrinterTableModel ptm = (PrinterTableModel)bonniePool.getModel();
+        PrinterTableModel ptm = (PrinterTableModel) bonniePool.getModel();
         //String jobQuery = "UPDATE main SET jobNum = ?, client = ?, jobName = ?, mailDate = ?, type = ?, jobStatus = ?, notes = ?, programmer = ?, signOffs = ?, approved = ?, production = ?, platform = ?, csr = ?, printer = ?, data = ? WHERE id = ?";
-        String jobQuery = "UPDATE jobs SET jobNum=?, client=?, jobName=?, status=?, programmer=? WHERE id = ?";
-        String pkgQuery = "UPDATE packages SET pkgName =?, mailDate=?, status=?, size=?, nUp=?, printer=?, queuePos=?, ert=?, WHERE id = ?";
-        for (int i = 0; i < ptm.getRowCount(); i++) {
-            //ptm.dataVector.elementAt(0)
+
+        String jobQuery = "UPDATE jobs SET jobNum=?, client=?, jobName=?, programmer=? WHERE id=?";
+        String pkgQuery = "UPDATE packages SET pkgName =?, mailDate=?, status=?, size=?, nUp=?, printer=?, ert=?, queuePos=? WHERE id = ? AND pkgName = ?";  //Added pkg name due to the fact packages lack a unique identifier
+        ArrayList jobValues = new ArrayList();
+        ArrayList pkgValues = new ArrayList();
+        try {
+            for (int i = 0; i < ptm.getRowCount(); i++) {
+
+                JobPackage jp = (JobPackage) ptm.dataVector.elementAt(i);
+                jobValues.add(ProductionSchedule.exportHandler(jp)[0]);
+                pkgValues.add(ProductionSchedule.exportHandler(jp)[1]);
+            }
+            System.out.println("Job Values:\n");
+            for (int i = 0; i < jobValues.size(); i++) {
+                System.out.println(jobValues.get(i));
+            }
+            System.out.println("Pkg Values:\n");
+            for (int i = 0; i < pkgValues.size(); i++) {
+                System.out.println(pkgValues.get(i));
+            }
+            DatabaseTools.multiUpdateDatabase(dbo, pkgQuery, pkgValues);
+            DatabaseTools.multiUpdateDatabase(dbo, jobQuery, jobValues);
+        } catch (SQLException | ClassNotFoundException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException ex) {
+            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
+
     }//GEN-LAST:event_commitButtonActionPerformed
 
     private void TestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TestActionPerformed
@@ -409,26 +453,28 @@ public class UI extends javax.swing.JFrame {
             String query = "SELECT * FROM jobs LIMIT 1";
             DatabaseOutputObject dboo = DatabaseTools.queryDatabase(dbo, query);
             int columnCount = dboo.rowSet.getMetaData().getColumnCount();
-            jobs = importHandler(dboo);
+            jobs = ProductionSchedule.importHandler(dboo);
             Job j = (Job) jobs.get(0);
             ArrayList packList = j.packages;
             ArrayList bonnie = new ArrayList();
             Package p = (Package) j.packages.get(0);
             JobPackage jP = new JobPackage(p, dbo);
             ArrayList[] al = ProductionSchedule.exportHandler(jP);
-            for (ArrayList a : al){
-                for(Object o : a){
+
+            for (ArrayList a : al) {
+                for (Object o : a) {
                     System.out.println(o.toString());
                 }
             }
+
         } catch (ClassNotFoundException | SQLException | IllegalArgumentException | IllegalAccessException | NoSuchFieldException ex) {
             Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }//GEN-LAST:event_TestActionPerformed
 
     /**
-     * * @param args the command line arguments
+     * @param args the command line arguments
      */
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -564,9 +610,9 @@ public class UI extends javax.swing.JFrame {
             System.out.println("PrinterTableModelHasChanged!");
             switch (e.getType()) {
                 case TableModelEvent.INSERT:
-                    for (int i = 0; i <= ptm.getRowCount()-1; i++) {
+                    for (int i = 0; i <= ptm.getRowCount() - 1; i++) {
                         System.out.println("Number Of Rows: " + ptm.getRowCount());
-                        String s = "B-" + (i+1);
+                        String s = "B-" + (i + 1);
                         System.out.println("Row Inserted");
                         System.out.println("First Row: " + firstRow + " Last Row: " + lastRow);
                         ptm.setValueAt(s, i, 12);
@@ -576,9 +622,9 @@ public class UI extends javax.swing.JFrame {
                     System.out.println("Row Updated");
                     break;
                 case TableModelEvent.DELETE:
-                    for (int i = 0; i <= ptm.getRowCount()-1; i++) {
+                    for (int i = 0; i <= ptm.getRowCount() - 1; i++) {
                         System.out.println("Number Of Rows: " + ptm.getRowCount());
-                        String s = "B-" + (i+1);
+                        String s = "B-" + (i + 1);
                         System.out.println("Row Deleted");
                         System.out.println("First Row: " + firstRow + " Last Row: " + lastRow);
                         ptm.setValueAt(s, i, 12);
@@ -599,9 +645,9 @@ public class UI extends javax.swing.JFrame {
             System.out.println("PrinterTableModelHasChanged!");
             switch (e.getType()) {
                 case TableModelEvent.INSERT:
-                    for (int i = 0; i <= ptm.getRowCount()-1; i++) {
+                    for (int i = 0; i <= ptm.getRowCount() - 1; i++) {
                         System.out.println("Number Of Rows: " + ptm.getRowCount());
-                        String s = "C-" + (i+1);
+                        String s = "C-" + (i + 1);
                         System.out.println("Row Inserted");
                         System.out.println("First Row: " + firstRow + " Last Row: " + lastRow);
                         ptm.setValueAt(s, i, 12);
@@ -611,9 +657,9 @@ public class UI extends javax.swing.JFrame {
                     System.out.println("Row Updated");
                     break;
                 case TableModelEvent.DELETE:
-                    for (int i = 0; i <= ptm.getRowCount()-1; i++) {
+                    for (int i = 0; i <= ptm.getRowCount() - 1; i++) {
                         System.out.println("Number Of Rows: " + ptm.getRowCount());
-                        String s = "C-" + (i+1);
+                        String s = "C-" + (i + 1);
                         System.out.println("Row Deleted");
                         System.out.println("First Row: " + firstRow + " Last Row: " + lastRow);
                         ptm.setValueAt(s, i, 12);
@@ -634,9 +680,9 @@ public class UI extends javax.swing.JFrame {
             System.out.println("PrinterTableModelHasChanged!");
             switch (e.getType()) {
                 case TableModelEvent.INSERT:
-                    for (int i = 0; i <= ptm.getRowCount()-1; i++) {
+                    for (int i = 0; i <= ptm.getRowCount() - 1; i++) {
                         System.out.println("Number Of Rows: " + ptm.getRowCount());
-                        String s = "O-" + (i+1);
+                        String s = "O-" + (i + 1);
                         System.out.println("Row Inserted");
                         System.out.println("First Row: " + firstRow + " Last Row: " + lastRow);
                         ptm.setValueAt(s, i, 12);
@@ -646,9 +692,9 @@ public class UI extends javax.swing.JFrame {
                     System.out.println("Row Updated");
                     break;
                 case TableModelEvent.DELETE:
-                    for (int i = 0; i <= ptm.getRowCount()-1; i++) {
+                    for (int i = 0; i <= ptm.getRowCount() - 1; i++) {
                         System.out.println("Number Of Rows: " + ptm.getRowCount());
-                        String s = "O-" + (i+1);
+                        String s = "O-" + (i + 1);
                         System.out.println("Row Deleted");
                         System.out.println("First Row: " + firstRow + " Last Row: " + lastRow);
                         ptm.setValueAt(s, i, 12);

@@ -61,7 +61,8 @@ class PrinterTableModel extends AbstractTableModel {
     ////////////////////////////////////////////////////////////////////////
 
     public int getColumnCount() {
-        Field[] fieldList = datalist.get(0).getClass().getFields();
+
+        Field[] fieldList = JobPackage.class.getFields();
         return fieldList.length;
     }
     ////////////////////////////////////////////////////////////////////////
@@ -82,7 +83,7 @@ class PrinterTableModel extends AbstractTableModel {
     ////////////////////////////////////////////////////////////////////////
 
     public String getColumnName(int col) {
-        Field[] fieldList = datalist.get(0).getClass().getFields();
+        Field[] fieldList = JobPackage.class.getFields();
         return fieldList[col].getName();
     }
     ////////////////////////////////////////////////////////////////////////
@@ -217,7 +218,7 @@ class PrinterTableModel extends AbstractTableModel {
         Field fieldlist[] = cls.getFields();
         Vector v = new Vector();
         for (int i = 0; i < fieldlist.length; i++) {
-            if(i ==  column){
+            if (i == column) {
                 String names = fieldlist[i].toString();
                 String[] fieldName = names.split("\\.");    // Splits the object name string on periods
                 String lastName = fieldName[fieldName.length - 1];    // Pulls the position of the string which contains the property name
@@ -233,6 +234,7 @@ class PrinterTableModel extends AbstractTableModel {
         //v.setElementAt(aValue, column);
         fireTableCellUpdated(row, column);
     }
+
     public void setCellValueAt(Object aValue, int row, int column) {
         JobPackage rowObject = (JobPackage) dataVector.elementAt(row);
         rowObject.queuePos = (String) aValue;

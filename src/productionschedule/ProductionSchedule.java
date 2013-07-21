@@ -183,7 +183,8 @@ public class ProductionSchedule {
         //End crazy ass code
 
     }
-   /////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////
+
     public static ArrayList[] exportHandler(JobPackage jp) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
         //Crazy ass code to emulate a for each loop
         Class cls = Class.forName("productionschedule.JobPackage");
@@ -192,37 +193,47 @@ public class ProductionSchedule {
         ArrayList<String> jobFieldNames = new ArrayList<String>();
         ArrayList<Field> pkgFields = new ArrayList<Field>(Arrays.asList(Package.class.getFields()));
         ArrayList<String> pkgFieldNames = new ArrayList<String>();
-        int j=0;
-        for(Field f : jobFields){
+        int j = 0;
+        for (Field f : jobFields) {
             jobFieldNames.add(f.getName());
             j++;
         }
-        j=0;
-        for(Field f : pkgFields){
+        j = 0;
+        for (Field f : pkgFields) {
             pkgFieldNames.add(f.getName());
             j++;
         }
         ArrayList jobValues = new ArrayList();
         ArrayList pkgValues = new ArrayList();
         for (int i = 0; i < fieldlist.length; i++) {
-            if (pkgFieldNames.contains(fieldlist[i].getName())) {
+            if (pkgFieldNames.contains(fieldlist[i].getName()) && !fieldlist[i].getName().contains("pages")) {
                 System.out.println("Pkg Tested True");
                 String fieldName = fieldlist[i].getName();
-                Field propertyField = jp.getClass().getField(fieldName);
-                String propertyValue = propertyField.get(jp).toString();
-                pkgValues.add(propertyValue);
+                String propertyValue;
+                Field propertyField;
+                try {
+                    propertyField = jp.getClass().getField(fieldName);
+                    pkgValues.add(propertyField.get(jp));
+                } catch (NullPointerException e) {
+                    propertyValue = "";
+                    pkgValues.add(propertyValue);
+                }
+
             }
-            else if (jobFieldNames.contains(fieldlist[i].getName())) {
+            if (jobFieldNames.contains(fieldlist[i].getName()) && !fieldlist[i].getName().contains("status")) {
                 System.out.println("Job Tested True");
                 String fieldName = fieldlist[i].getName();
                 Field propertyField = jp.getClass().getField(fieldName);
-                String propertyValue = propertyField.get(jp).toString();
-                jobValues.add(propertyValue);
+
+                jobValues.add(propertyField.get(jp));
             }
         }
+        String fieldName = fieldlist[3].getName();                  //
+        Field propertyField = jp.getClass().getField(fieldName);    // Adding extra pkgName to the end for unique identifier
+        pkgValues.add(propertyField.get(jp));                       //
         ArrayList[] al = new ArrayList[2];
-        al[1] = jobValues;
-        al[2] = pkgValues;
+        al[0] = jobValues;
+        al[1] = pkgValues;
         return al;
         //End crazy ass code
 
@@ -235,7 +246,7 @@ public class ProductionSchedule {
         while (exDBOO.rowSet.next()) {
             int numberOfColumns = exDBOO.rowSet.getMetaData().getColumnCount();
             Class cls = Class.forName("productionschedule.Job");
-            Field fieldlist[] = cls.getDeclaredFields();
+            Field fieldlist[] = cls.getFields();
             Map<String, Object> map = new HashMap<String, Object>();
             for (int i = 0; i < fieldlist.length; i++) {
                 if (!fieldlist[i].getName().equals("packages")) {
@@ -252,13 +263,34 @@ public class ProductionSchedule {
     }
     ////////////////////////////////////////////////////////////////////////////
 
+    public static ArrayList pkgImportHandler(DatabaseOutputObject exDBOO, Class c) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException {
+        // TODO add packages to importHandler
+        ArrayList pkgs = new ArrayList();
+        while (exDBOO.rowSet.next()) {
+            Field fieldlist[] = c.getFields();
+            Map<String, Object> map = new HashMap<String, Object>();
+            for (int i = 0; i < fieldlist.length; i++) {
+                String fieldName = fieldlist[i].getName();
+                if (!fieldName.contains("pages")) {
+                    System.out.println(fieldName);
+                    System.out.println(exDBOO.rowSet.getObject(fieldName));
+                    map.put(fieldName, exDBOO.rowSet.getObject(fieldName));
+                }
+            }
+            Package p = new Package(map);
+            pkgs.add(p);
+        }
+        return pkgs;
+    }
+    ////////////////////////////////////////////////////////////////////////////
+
     public static void test() throws FileNotFoundException, IOException, ClassNotFoundException, ParseException, SQLException {
         File f = new File("C:\\LASER\\csv Reports\\65395 Laser Production Count Sheet.csv");
         CsvReader newReader = new CsvReader("C:\\LASER\\csv Reports\\65268 Laser Production Count Sheet.csv");
         csvToJob(f);
     }
-    
-    public static ArrayList pkgToSql(){
+
+    public static ArrayList pkgToSql() {
         return null;
     }
     ////////////////////////////////////////////////////////////////////////////

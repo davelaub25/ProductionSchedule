@@ -19,7 +19,7 @@ public class Package {
     public Date mailDate; // Contained in CSV
     public String status;
     public int size;      // Contained in CSV
-    public int pages;
+    protected int pages;
     public int nUp;       // Contained in CSV
     public String printer;
     public String queuePos;
@@ -52,10 +52,11 @@ public class Package {
     }
 
     Package(Map properties) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException {
-        Field fieldlist[] = this.getClass().getDeclaredFields();
+        Field fieldlist[] = this.getClass().getFields();
         for (int i = 0; i < fieldlist.length; i++) {
             fieldlist[i].set(this, properties.get(fieldlist[i].getName()));
         }
+        pages = numberOfPages();
     }
 
     Package(JobPackage jP) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException {
