@@ -18,11 +18,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import com.csvreader.CsvReader;
+import java.awt.Component;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
+import javax.swing.JTable;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 
 /**
  *
@@ -38,28 +44,6 @@ public class ProductionSchedule {
     public static final int firstPkgFieldIndex = lastJobFieldIndex + 1;
     public static ArrayList successfulEntries = new ArrayList();
 
-//    public static Job csvToJob(File f, int i) throws FileNotFoundException, IOException, ParseException, ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException{
-//        CsvReader reader = new CsvReader(new FileReader(f));
-//        CsvReader namer = reader;
-//        namer.readNext();
-//        String insertQuery = "INSERT INTO `dlaub25_lasersched`.`jobs` "
-//        + "(`jobNum`, `client`, `jobName`, `status`, `programmer`, `id`) "
-//        + "VALUES (?, ?, ?, ?, ?, ?);";
-//        String [] nameLine = namer.readNext();
-//        String [] nextLine;
-//        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-//        Job j = new Job(nameLine[0], nameLine[1], nameLine[2],
-//                "Queued", java.nio.file.Files.getOwner(f.toPath()).toString(), "", i);
-//        reader.readNext(); //Skips the header row
-//        while ((nextLine = reader.readNext()) != null) {
-//            Date d = null;
-//            Package p = new Package(nextLine[3], df.parse(nextLine[7]), "Queued",
-//                    Integer.parseInt(nextLine[4]), Integer.parseInt(nextLine[5]), Double.parseDouble(nextLine[6]));
-//            j.addPackage(p);
-//        }
-//
-//        return j;
-//    }
     ////////////////////////////////////////////////////////////////////////////
     public static void csvToJob(File f) throws FileNotFoundException, IOException, ClassNotFoundException, ParseException, SQLException {
         CsvReader reader = new CsvReader(new FileReader(f));
@@ -293,6 +277,8 @@ public class ProductionSchedule {
     public static ArrayList pkgToSql() {
         return null;
     }
+
+
     ////////////////////////////////////////////////////////////////////////////
 //    public static JTable buildJobTable(ArrayList jobs){
 //        for (int curJob = 0; curJob < jobs.size(); curJob++) {

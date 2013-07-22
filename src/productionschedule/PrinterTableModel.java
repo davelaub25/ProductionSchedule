@@ -9,7 +9,10 @@ import java.util.ArrayList;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
 
 /**
  *
@@ -246,4 +249,6 @@ class PrinterTableModel extends AbstractTableModel {
         datalist.remove(row);
         fireTableRowsDeleted(row, row);
     }
+
+
 }

@@ -19,7 +19,7 @@ public class Job {
     public String jobNum;       //Contained in csv
     public String client;       //Contained in csv
     public String jobName;      //Contained in csv
-    public ArrayList packages;
+    public ArrayList<Package> packages;
     public String status;
     public String programmer;
     public int id;

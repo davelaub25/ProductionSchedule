@@ -32,7 +32,11 @@ class PoolTableModel extends AbstractTableModel {
     private static Vector nonNullVector(Vector v) {
         return (v != null) ? v : new Vector();
     }
-    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+
+    public PoolTableModel() {
+    }
+    ////////////////////////////////////////////////////////////////////////////
 
     public PoolTableModel(ArrayList l) {
         Object[] a;
@@ -61,7 +65,7 @@ class PoolTableModel extends AbstractTableModel {
     ////////////////////////////////////////////////////////////////////////
 
     public int getColumnCount() {
-        Field[] fieldList = datalist.get(0).getClass().getFields();
+        Field[] fieldList = Package.class.getFields();
         return fieldList.length;
     }
     ////////////////////////////////////////////////////////////////////////
@@ -82,7 +86,7 @@ class PoolTableModel extends AbstractTableModel {
     ////////////////////////////////////////////////////////////////////////
 
     public String getColumnName(int col) {
-        Field[] fieldList = datalist.get(0).getClass().getFields();
+        Field[] fieldList = Package.class.getFields();
         return fieldList[col].getName();
     }
     ////////////////////////////////////////////////////////////////////////

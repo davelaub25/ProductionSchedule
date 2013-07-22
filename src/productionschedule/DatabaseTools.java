@@ -145,7 +145,8 @@ public class DatabaseTools {
                         }
                     }
                     System.out.println(preparedStmtUpdate.toString());
-                    preparedStmtUpdate.executeUpdate();
+                    int sqlResult = preparedStmtUpdate.executeUpdate();
+                    System.out.println(sqlResult);
                 }
             }
         } else {

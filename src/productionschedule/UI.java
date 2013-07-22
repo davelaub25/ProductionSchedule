@@ -5,6 +5,7 @@
 package productionschedule;
 
 import com.mysql.jdbc.exceptions.MySQLDataException;
+import java.awt.Component;
 import java.awt.Frame;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDragEvent;
@@ -17,8 +18,10 @@ import java.util.TooManyListenersException;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.DropMode;
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -28,7 +31,11 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import productionschedule.JobPackage;
 
 /**
@@ -84,13 +91,26 @@ public class UI extends javax.swing.JFrame {
             } catch (NullPointerException ex) {
             }
         }
-        Job j = (Job) jobs.get(0);
-        ArrayList packList = j.packages;
-
-
-
-        AbstractTableModel jtm = new JobTableModel(jobs);
-        AbstractTableModel ptm = new PoolTableModel(packList);
+        int numJobs = jobs.size();
+        ArrayList<Job> jl = new ArrayList();
+        jl.addAll(jobs);
+        for (int i = 0; i < numJobs; i++) {
+            Job j = jobs.get(i);
+            int numQueued = 0;
+            for (Package p : j.packages) {
+                try {
+                    if (!p.queuePos.isEmpty()) {
+                        numQueued++;
+                    }
+                } catch (NullPointerException ex) {
+                }
+            }
+            if (numQueued == j.packages.size()) {
+                jl.remove(j);
+            }
+        }
+        AbstractTableModel jtm = new JobTableModel(jl);
+        AbstractTableModel ptm = new PoolTableModel();
         AbstractTableModel btm = new PrinterTableModel(bonnie);
         AbstractTableModel ctm = new PrinterTableModel(clyde);
         AbstractTableModel otm = new PrinterTableModel(oce);
@@ -101,6 +121,13 @@ public class UI extends javax.swing.JFrame {
         bonniePool = new JTable(btm);
         clydePool = new JTable(ctm);
         ocePool = new JTable(otm);
+
+        TableColumn tc = bonniePool.getColumnModel().getColumn(5);
+        JComboBox cb = new JComboBox();
+        cb.addItem("Queued");
+        cb.addItem("Printed");
+        DefaultCellEditor dce = new DefaultCellEditor(cb);
+        tc.setCellEditor(dce);
 
         jobPoolTable.getSelectionModel().addListSelectionListener(new RowSelectedListener());
         jobPoolTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -405,8 +432,8 @@ public class UI extends javax.swing.JFrame {
 //        } catch (IllegalArgumentException ex) {
 //            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
 //        } catch (IllegalAccessException ex) {
-//                    Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
-//            }
+//                        Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+        //            }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void testButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testButtonActionPerformed
@@ -417,34 +444,41 @@ public class UI extends javax.swing.JFrame {
     }//GEN-LAST:event_refreshButtonActionPerformed
 
     private void commitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_commitButtonActionPerformed
-        PrinterTableModel ptm = (PrinterTableModel) bonniePool.getModel();
+
         //String jobQuery = "UPDATE main SET jobNum = ?, client = ?, jobName = ?, mailDate = ?, type = ?, jobStatus = ?, notes = ?, programmer = ?, signOffs = ?, approved = ?, production = ?, platform = ?, csr = ?, printer = ?, data = ? WHERE id = ?";
 
         String jobQuery = "UPDATE jobs SET jobNum=?, client=?, jobName=?, programmer=? WHERE id=?";
         String pkgQuery = "UPDATE packages SET pkgName =?, mailDate=?, status=?, size=?, nUp=?, printer=?, ert=?, queuePos=? WHERE id = ? AND pkgName = ?";  //Added pkg name due to the fact packages lack a unique identifier
         ArrayList jobValues = new ArrayList();
         ArrayList pkgValues = new ArrayList();
-        try {
-            for (int i = 0; i < ptm.getRowCount(); i++) {
 
-                JobPackage jp = (JobPackage) ptm.dataVector.elementAt(i);
-                jobValues.add(ProductionSchedule.exportHandler(jp)[0]);
-                pkgValues.add(ProductionSchedule.exportHandler(jp)[1]);
+            ArrayList <JTable>tables = new ArrayList();
+            tables.add(bonniePool);
+            tables.add(clydePool);
+            tables.add(ocePool);
+        for (JTable jt : tables) {
+            PrinterTableModel ptm = (PrinterTableModel) jt.getModel();
+            try {
+                for (int i = 0; i < ptm.getRowCount(); i++) {
+
+                    JobPackage jp = (JobPackage) ptm.dataVector.elementAt(i);
+                    jobValues.add(ProductionSchedule.exportHandler(jp)[0]);
+                    pkgValues.add(ProductionSchedule.exportHandler(jp)[1]);
+                }
+                System.out.println("Job Values:\n");
+                for (int i = 0; i < jobValues.size(); i++) {
+                    System.out.println(jobValues.get(i));
+                }
+                System.out.println("Pkg Values:\n");
+                for (int i = 0; i < pkgValues.size(); i++) {
+                    System.out.println(pkgValues.get(i));
+                }
+                DatabaseTools.multiUpdateDatabase(dbo, pkgQuery, pkgValues);
+                DatabaseTools.multiUpdateDatabase(dbo, jobQuery, jobValues);
+            } catch (SQLException | ClassNotFoundException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException ex) {
+                Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
             }
-            System.out.println("Job Values:\n");
-            for (int i = 0; i < jobValues.size(); i++) {
-                System.out.println(jobValues.get(i));
-            }
-            System.out.println("Pkg Values:\n");
-            for (int i = 0; i < pkgValues.size(); i++) {
-                System.out.println(pkgValues.get(i));
-            }
-            DatabaseTools.multiUpdateDatabase(dbo, pkgQuery, pkgValues);
-            DatabaseTools.multiUpdateDatabase(dbo, jobQuery, jobValues);
-        } catch (SQLException | ClassNotFoundException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException ex) {
-            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
         }
-
 
     }//GEN-LAST:event_commitButtonActionPerformed
 
@@ -470,6 +504,7 @@ public class UI extends javax.swing.JFrame {
         } catch (ClassNotFoundException | SQLException | IllegalArgumentException | IllegalAccessException | NoSuchFieldException ex) {
             Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
         }
+
 
     }//GEN-LAST:event_TestActionPerformed
 
@@ -589,6 +624,15 @@ public class UI extends javax.swing.JFrame {
             System.out.println("Class: " + e.getClass().toString());
             JobTableModel jtm = (JobTableModel) jobPoolTable.getModel();
             Job tempJob = (Job) jtm.dataVector.get(dlsm.getLeadSelectionIndex());
+            ArrayList<Package> pkgList = tempJob.packages;
+            for (int i = 0; i < pkgList.size(); i++) {
+                try {
+                    if (!pkgList.get(i).queuePos.isEmpty()) {
+                        pkgList.remove(i);
+                    }
+                } catch (NullPointerException ex) {
+                }
+            }
             AbstractTableModel tempPoolModel = new PoolTableModel(tempJob.packages);
             packagePoolTable = new JTable(tempPoolModel);
             pkgPoolPane.setViewportView(packagePoolTable);
@@ -701,6 +745,24 @@ public class UI extends javax.swing.JFrame {
                     }
                     break;
             }
+        }
+    }
+    class ColumnRenderer extends JComboBox implements TableCellRenderer{
+        public void updateUI(){
+            super.updateUI();
+        }
+        public void revalidate() {}
+        public Component getTableCellRendererComponent(
+                     JTable table, Object value,
+                     boolean isSelected, boolean hasFocus,
+                     int row, int column)
+        {
+            if (value != null) {
+                //System.out.println(value.toString());
+                removeAllItems();
+                addItem(value);
+            }
+            return this;
         }
     }
 }
