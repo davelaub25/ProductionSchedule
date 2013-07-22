@@ -18,17 +18,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import com.csvreader.CsvReader;
-import java.awt.Component;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.DefaultCellEditor;
-import javax.swing.JComboBox;
-import javax.swing.JTable;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
 
 /**
  *
@@ -226,7 +220,12 @@ public class ProductionSchedule {
 
     public static ArrayList importHandler(DatabaseOutputObject exDBOO) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException {
         // TODO add packages to importHandler
+        double d = 100.0;
+        double e = (double)exDBOO.rowSet.size();
+        int increment = (int)Math.ceil(d/e);
         ArrayList jobs = new ArrayList();
+        //splashScreen.splashBar.setValue(0);
+        int progress = 0;
         while (exDBOO.rowSet.next()) {
             int numberOfColumns = exDBOO.rowSet.getMetaData().getColumnCount();
             Class cls = Class.forName("productionschedule.Job");
@@ -242,6 +241,8 @@ public class ProductionSchedule {
             }
             Job j = new Job(map);
             jobs.add(j);
+            progress = progress + increment;
+            UI.splashProgress(progress);
         }
         return jobs;
     }

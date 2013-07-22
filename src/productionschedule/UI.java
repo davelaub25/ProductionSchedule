@@ -4,14 +4,22 @@
  */
 package productionschedule;
 
-import com.mysql.jdbc.exceptions.MySQLDataException;
+import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Frame;
-import java.awt.dnd.DropTarget;
+import java.awt.Graphics2D;
+import java.awt.SplashScreen;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.TooManyListenersException;
@@ -23,6 +31,7 @@ import javax.swing.DefaultListSelectionModel;
 import javax.swing.DropMode;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.TransferHandler;
@@ -31,12 +40,9 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
-import productionschedule.JobPackage;
 
 /**
  *
@@ -55,14 +61,48 @@ public class UI extends javax.swing.JFrame {
     public static JTable ocePool;
     public TransferHandler jtmHandler = new TableRowTransferHandler();
     public DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched", "dlaub25_fmi", "admin");
+    static SplashScreen mySplash; 
+    static Graphics2D splashGraphics;               // graphics context for overlay of the splash image
+    static Rectangle2D.Double splashTextArea;       // area where we draw the text
+    static Rectangle2D.Double splashProgressArea;   // area where we draw the progress bar
+    static Font font; 
+    public static int height;
+    public static int width;
 
     //public static Job j = new Job(1, "A", "B", "C", "D", "E", 2);
     /**
      * Creates new form UI
      */
-    public UI() throws TooManyListenersException, ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException {
-        initComponents();
+    public UI() throws TooManyListenersException, ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException, MalformedURLException, NullPointerException, IOException {
+        
+        mySplash = SplashScreen.getSplashScreen();
+        
+        
+        Dimension ssDim = mySplash.getSize();
+        height = ssDim.height;
+        width = ssDim.width;
+        if (mySplash != null)
+        {
+            // get the size of the image now being displayed
 
+
+            // stake out some area for our status information
+            splashTextArea = new Rectangle2D.Double(width * .55, height*0.88, width * .45, 32.);
+            splashProgressArea = new Rectangle2D.Double(width * .55, height*.92, width*.4, 24 );
+
+            // create the Graphics environment for drawing status info
+            splashGraphics = mySplash.createGraphics();
+            font = new Font("Arial", Font.BOLD, 24);
+            splashGraphics.setFont(font);
+
+            // initialize the status info
+            splashText("Loading Jobs...");
+            splashProgress(0);
+        }
+        Graphics2D g = mySplash.createGraphics();
+        
+        initComponents();
+        
         String jobQuery = "SELECT * FROM jobs";
         DatabaseOutputObject jobDboo = DatabaseTools.queryDatabase(dbo, jobQuery);
         jobs = ProductionSchedule.importHandler(jobDboo);
@@ -73,8 +113,15 @@ public class UI extends javax.swing.JFrame {
         ArrayList bonnie = new ArrayList();
         ArrayList clyde = new ArrayList();
         ArrayList oce = new ArrayList();
-
+        
+        double d = 100.0;
+        double e = (double)pkgs.size();
+        int increment = (int)Math.ceil(d/e);
+        UI.splashProgress(0);
+        UI.splashText("Loading Packages...");
+        int progress = 0;
         for (int i = 0; i < pkgs.size(); i++) {
+            System.out.println("Adding Package");
             try {
                 if (!pkgs.get(i).queuePos.isEmpty()) {
                     if (pkgs.get(i).queuePos.startsWith("B")) {
@@ -90,11 +137,14 @@ public class UI extends javax.swing.JFrame {
                 }
             } catch (NullPointerException ex) {
             }
+            progress = progress + increment;
+            UI.splashProgress(progress);
         }
         int numJobs = jobs.size();
         ArrayList<Job> jl = new ArrayList();
         jl.addAll(jobs);
         for (int i = 0; i < numJobs; i++) {
+            System.out.println("Adding Jobs");
             Job j = jobs.get(i);
             int numQueued = 0;
             for (Package p : j.packages) {
@@ -167,7 +217,7 @@ public class UI extends javax.swing.JFrame {
         bonniePool.setFillsViewportHeight(true);
         clydePool.setFillsViewportHeight(true);
         ocePool.setFillsViewportHeight(true);
-
+        //splash.close();
     }
 
     /**
@@ -540,7 +590,11 @@ public class UI extends javax.swing.JFrame {
             public void run() {
                 try {
                     new UI().setVisible(true);
-                } catch (TooManyListenersException | ClassNotFoundException | SQLException | IllegalArgumentException | IllegalAccessException ex) {
+                } catch (TooManyListenersException | ClassNotFoundException | SQLException | IllegalArgumentException | IllegalAccessException | NullPointerException ex) {
+                    Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (MalformedURLException ex) {
+                    Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
                     Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
@@ -765,4 +819,65 @@ public class UI extends javax.swing.JFrame {
             return this;
         }
     }
+    
+     public static void splashText(String str)
+    {
+        if (mySplash != null && mySplash.isVisible())
+        {   // important to check here so no other methods need to know if there
+            // really is a Splash being displayed
+
+            // erase the last status text
+            splashGraphics.setBackground(splashGraphics.getBackground());
+//            Double textX = width * .55;
+//            Double textY = height*0.88;
+//            Double textW = width*.45;
+//            Double textH = 32.;
+//            splashGraphics.clearRect(textX.intValue(), textY.intValue(), textW.intValue(), textH.intValue());
+//            splashGraphics.setPaint(Color.LIGHT_GRAY);
+//            splashGraphics.fill(splashTextArea);
+
+            // draw the text
+            splashGraphics.setPaint(Color.BLACK);
+            splashGraphics.drawString(str, (int)(splashTextArea.getX() + 10),(int)(splashTextArea.getY() + 15));
+
+            // make sure it's displayed
+            mySplash.update();
+        }
+    }
+    /**
+     * Display a (very) basic progress bar
+     * @param pct how much of the progress bar to display 0-100
+     */
+    public static void splashProgress(int pct)
+    {
+        if (mySplash != null && mySplash.isVisible())
+        {
+
+            // Note: 3 colors are used here to demonstrate steps
+            // erase the old one
+//            splashGraphics.setPaint(Color.GREEN);
+//            splashGraphics.fill(splashProgressArea);
+//
+//            // draw an outline
+            splashGraphics.setPaint(Color.GREEN);
+            splashGraphics.draw(splashProgressArea);
+
+            // Calculate the width corresponding to the correct percentage
+            int x = (int) splashProgressArea.getMinX();
+            int y = (int) splashProgressArea.getMinY();
+            int wid = (int) splashProgressArea.getWidth();
+            int hgt = (int) splashProgressArea.getHeight();
+
+            int doneWidth = Math.round(pct*wid/100.f);
+            doneWidth = Math.max(0, Math.min(doneWidth, wid-1));  // limit 0-width
+
+            // fill the done part one pixel smaller than the outline
+            splashGraphics.setPaint(Color.GREEN);
+            splashGraphics.fillRect(x, y+1, doneWidth, hgt-1);
+
+            // make sure it's displayed
+            mySplash.update();
+        }
+    }
+    
 }
