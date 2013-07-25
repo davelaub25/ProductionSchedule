@@ -4,7 +4,6 @@
  */
 package productionschedule;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -19,7 +18,6 @@ import java.awt.dnd.DropTargetListener;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.TooManyListenersException;
@@ -31,7 +29,6 @@ import javax.swing.DefaultListSelectionModel;
 import javax.swing.DropMode;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
-import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.TransferHandler;
@@ -43,6 +40,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableRowSorter;
 
 /**
  *
@@ -63,11 +61,16 @@ public class UI extends javax.swing.JFrame {
     public DatabaseObject dbo = new DatabaseObject("jdbc:mysql://davelaub.com:3306/dlaub25_lasersched", "dlaub25_fmi", "admin");
     static SplashScreen mySplash; 
     static Graphics2D splashGraphics;               // graphics context for overlay of the splash image
-    static Rectangle2D.Double splashTextArea;       // area where we draw the text
-    static Rectangle2D.Double splashProgressArea;   // area where we draw the progress bar
+    static Rectangle2D.Double splashTextArea1;       // area where we draw the text
+    static Rectangle2D.Double splashProgressArea1;   // area where we draw the progress bar
+    static Rectangle2D.Double splashTextArea2;       // area where we draw the text
+    static Rectangle2D.Double splashProgressArea2;   // area where we draw the progress bar
     static Font font; 
     public static int height;
     public static int width;
+    public static TableRowSorter bonnieSorter;
+    public static TableRowSorter clydeSorter;
+    public static TableRowSorter oceSorter;
 
     //public static Job j = new Job(1, "A", "B", "C", "D", "E", 2);
     /**
@@ -86,9 +89,12 @@ public class UI extends javax.swing.JFrame {
             // get the size of the image now being displayed
 
 
+            
             // stake out some area for our status information
-            splashTextArea = new Rectangle2D.Double(width * .55, height*0.88, width * .45, 32.);
-            splashProgressArea = new Rectangle2D.Double(width * .55, height*.92, width*.4, 24 );
+            splashTextArea2 = new Rectangle2D.Double(width * .30, height*0.48, width * .45, 32.);
+            splashProgressArea2 = new Rectangle2D.Double(width * .30, height*.52, width*.4, 24 );
+            splashTextArea1 = new Rectangle2D.Double(width * .30, height*0.38, width * .45, 32.);
+            splashProgressArea1 = new Rectangle2D.Double(width * .30, height*.42, width*.4, 24 );
 
             // create the Graphics environment for drawing status info
             splashGraphics = mySplash.createGraphics();
@@ -96,8 +102,8 @@ public class UI extends javax.swing.JFrame {
             splashGraphics.setFont(font);
 
             // initialize the status info
-            splashText("Loading Jobs...");
-            splashProgress(0);
+            splashText1("Loading Jobs...");
+            splashProgress1(0);
         }
         Graphics2D g = mySplash.createGraphics();
         
@@ -106,7 +112,7 @@ public class UI extends javax.swing.JFrame {
         String jobQuery = "SELECT * FROM jobs";
         DatabaseOutputObject jobDboo = DatabaseTools.queryDatabase(dbo, jobQuery);
         jobs = ProductionSchedule.importHandler(jobDboo);
-        String pkgQuery = "SELECT * FROM packages";
+        String pkgQuery = "SELECT * FROM packages ORDER BY packages.queuePos ASC ";
         DatabaseOutputObject pkgDboo = DatabaseTools.queryDatabase(dbo, pkgQuery);
         pkgs = ProductionSchedule.pkgImportHandler(pkgDboo, Package.class);
 
@@ -117,8 +123,8 @@ public class UI extends javax.swing.JFrame {
         double d = 100.0;
         double e = (double)pkgs.size();
         int increment = (int)Math.ceil(d/e);
-        UI.splashProgress(0);
-        UI.splashText("Loading Packages...");
+        UI.splashProgress2(0);
+        UI.splashText2("Loading Packages...");
         int progress = 0;
         for (int i = 0; i < pkgs.size(); i++) {
             System.out.println("Adding Package");
@@ -138,7 +144,7 @@ public class UI extends javax.swing.JFrame {
             } catch (NullPointerException ex) {
             }
             progress = progress + increment;
-            UI.splashProgress(progress);
+            UI.splashProgress2(progress);
         }
         int numJobs = jobs.size();
         ArrayList<Job> jl = new ArrayList();
@@ -159,6 +165,7 @@ public class UI extends javax.swing.JFrame {
                 jl.remove(j);
             }
         }
+        
         AbstractTableModel jtm = new JobTableModel(jl);
         AbstractTableModel ptm = new PoolTableModel();
         AbstractTableModel btm = new PrinterTableModel(bonnie);
@@ -171,6 +178,22 @@ public class UI extends javax.swing.JFrame {
         bonniePool = new JTable(btm);
         clydePool = new JTable(ctm);
         ocePool = new JTable(otm);
+        
+//        ArrayList list = new ArrayList();
+//    	list.add( new RowSorter.SortKey(12, SortOrder.ASCENDING) );
+//        bonnieSorter = new TableRowSorter(btm);
+//        clydeSorter = new TableRowSorter(ctm);
+//        oceSorter = new TableRowSorter(otm);
+//        bonniePool.setAutoCreateRowSorter(true);
+//        bonniePool.setRowSorter(bonnieSorter);
+//        //bonnieSorter.toggleSortOrder(12);
+//        clydePool.setRowSorter(clydeSorter);
+//        //clydeSorter.toggleSortOrder(12);
+//        ocePool.setRowSorter(oceSorter);
+//        //oceSorter.toggleSortOrder(12);
+//        bonnieSorter.setSortKeys(list);
+//        bonnieSorter.sort();
+//        bonnieSorter.
 
         TableColumn tc = bonniePool.getColumnModel().getColumn(5);
         JComboBox cb = new JComboBox();
@@ -687,6 +710,7 @@ public class UI extends javax.swing.JFrame {
                 } catch (NullPointerException ex) {
                 }
             }
+            
             AbstractTableModel tempPoolModel = new PoolTableModel(tempJob.packages);
             packagePoolTable = new JTable(tempPoolModel);
             pkgPoolPane.setViewportView(packagePoolTable);
@@ -820,7 +844,7 @@ public class UI extends javax.swing.JFrame {
         }
     }
     
-     public static void splashText(String str)
+     public static void splashText1(String str)
     {
         if (mySplash != null && mySplash.isVisible())
         {   // important to check here so no other methods need to know if there
@@ -838,7 +862,7 @@ public class UI extends javax.swing.JFrame {
 
             // draw the text
             splashGraphics.setPaint(Color.BLACK);
-            splashGraphics.drawString(str, (int)(splashTextArea.getX() + 10),(int)(splashTextArea.getY() + 15));
+            splashGraphics.drawString(str, (int)(splashTextArea1.getX() + 10),(int)(splashTextArea1.getY() + 15));
 
             // make sure it's displayed
             mySplash.update();
@@ -848,7 +872,7 @@ public class UI extends javax.swing.JFrame {
      * Display a (very) basic progress bar
      * @param pct how much of the progress bar to display 0-100
      */
-    public static void splashProgress(int pct)
+    public static void splashProgress1(int pct)
     {
         if (mySplash != null && mySplash.isVisible())
         {
@@ -859,25 +883,86 @@ public class UI extends javax.swing.JFrame {
 //            splashGraphics.fill(splashProgressArea);
 //
 //            // draw an outline
-            splashGraphics.setPaint(Color.GREEN);
-            splashGraphics.draw(splashProgressArea);
+            splashGraphics.setPaint(Color.CYAN);
+            splashGraphics.draw(splashProgressArea1);
 
             // Calculate the width corresponding to the correct percentage
-            int x = (int) splashProgressArea.getMinX();
-            int y = (int) splashProgressArea.getMinY();
-            int wid = (int) splashProgressArea.getWidth();
-            int hgt = (int) splashProgressArea.getHeight();
+            int x = (int) splashProgressArea1.getMinX();
+            int y = (int) splashProgressArea1.getMinY();
+            int wid = (int) splashProgressArea1.getWidth();
+            int hgt = (int) splashProgressArea1.getHeight();
 
             int doneWidth = Math.round(pct*wid/100.f);
             doneWidth = Math.max(0, Math.min(doneWidth, wid-1));  // limit 0-width
 
             // fill the done part one pixel smaller than the outline
-            splashGraphics.setPaint(Color.GREEN);
+            splashGraphics.setPaint(Color.CYAN);
             splashGraphics.fillRect(x, y+1, doneWidth, hgt-1);
 
             // make sure it's displayed
             mySplash.update();
         }
     }
-    
+    public static void splashText2(String str)
+    {
+        if (mySplash != null && mySplash.isVisible())
+        {   // important to check here so no other methods need to know if there
+            // really is a Splash being displayed
+
+            // erase the last status text
+            splashGraphics.setBackground(splashGraphics.getBackground());
+//            Double textX = width * .55;
+//            Double textY = height*0.88;
+//            Double textW = width*.45;
+//            Double textH = 32.;
+//            splashGraphics.clearRect(textX.intValue(), textY.intValue(), textW.intValue(), textH.intValue());
+//            splashGraphics.setPaint(Color.LIGHT_GRAY);
+//            splashGraphics.fill(splashTextArea);
+
+            // draw the text
+            splashGraphics.setPaint(Color.BLACK);
+            splashGraphics.drawString(str, (int)(splashTextArea2.getX() + 10),(int)(splashTextArea2.getY() + 15));
+
+            // make sure it's displayed
+            mySplash.update();
+        }
+    }
+    /**
+     * Display a (very) basic progress bar
+     * @param pct how much of the progress bar to display 0-100
+     */
+    public static void splashProgress2(int pct)
+    {
+        if (mySplash != null && mySplash.isVisible())
+        {
+
+            // Note: 3 colors are used here to demonstrate steps
+            // erase the old one
+//            splashGraphics.setPaint(Color.GREEN);
+//            splashGraphics.fill(splashProgressArea);
+//
+//            // draw an outline
+            splashGraphics.setPaint(Color.CYAN);
+            splashGraphics.draw(splashProgressArea2);
+
+            // Calculate the width corresponding to the correct percentage
+            int x = (int) splashProgressArea2.getMinX();
+            int y = (int) splashProgressArea2.getMinY();
+            int wid = (int) splashProgressArea2.getWidth();
+            int hgt = (int) splashProgressArea2.getHeight();
+
+            int doneWidth = Math.round(pct*wid/100.f);
+            doneWidth = Math.max(0, Math.min(doneWidth, wid-1));  // limit 0-width
+
+            // fill the done part one pixel smaller than the outline
+            splashGraphics.setPaint(Color.CYAN);
+            splashGraphics.fillRect(x, y+1, doneWidth, hgt-1);
+
+            // make sure it's displayed
+            mySplash.update();
+        }
+    }
+    public void clearEmptyJobs(){
+        
+    }
 }

@@ -242,7 +242,7 @@ public class ProductionSchedule {
             Job j = new Job(map);
             jobs.add(j);
             progress = progress + increment;
-            UI.splashProgress(progress);
+            UI.splashProgress1(progress);
         }
         return jobs;
     }
