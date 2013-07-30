@@ -697,17 +697,53 @@ public class UI extends javax.swing.JFrame {
         @Override
         public void valueChanged(ListSelectionEvent e) {
             DefaultListSelectionModel dlsm = (DefaultListSelectionModel) e.getSource();
+            PrinterTableModel btm = (PrinterTableModel)bonniePool.getModel();
+            PrinterTableModel ctm = (PrinterTableModel)clydePool.getModel();
+            PrinterTableModel otm = (PrinterTableModel)ocePool.getModel();
             System.out.println("Row Currently selected: " + dlsm.getLeadSelectionIndex());
             System.out.println("Class: " + e.getClass().toString());
             JobTableModel jtm = (JobTableModel) jobPoolTable.getModel();
             Job tempJob = (Job) jtm.dataVector.get(dlsm.getLeadSelectionIndex());
             ArrayList<Package> pkgList = tempJob.packages;
             for (int i = 0; i < pkgList.size(); i++) {
+                
+                try {
+                    for (int j = 0; j < btm.getRowCount(); j++) {
+                        JobPackage btjp = (JobPackage)btm.dataVector.get(j);
+                        if(pkgList.get(i).pkgName.equals(btjp.pkgName) && pkgList.get(i).id == btjp.id){
+                            pkgList.remove(i);
+                            break;
+                        }
+                    }
+                } catch (NullPointerException ex) {
+                }
+                try {                
+                    for (int j = 0; j < ctm.getRowCount(); j++) {
+                        JobPackage ctjp = (JobPackage)ctm.dataVector.get(j);
+                        if(pkgList.get(i).pkgName.equals(ctjp.pkgName) && pkgList.get(i).id == ctjp.id){
+                            pkgList.remove(i);
+                            break;
+                        }
+                    }
+                } catch (NullPointerException ex) {
+                }
+                try {                
+                    for (int j = 0; j < otm.getRowCount(); j++) {
+                        JobPackage otjp = (JobPackage)otm.dataVector.get(j);
+                        if(pkgList.get(i).pkgName.equals(otjp.pkgName) && pkgList.get(i).id == otjp.id){
+                            pkgList.remove(i);
+                            break;
+                        }
+                    }
+                } catch (NullPointerException ex) {
+                }
+                
                 try {
                     if (!pkgList.get(i).queuePos.isEmpty()) {
                         pkgList.remove(i);
                     }
                 } catch (NullPointerException ex) {
+                    
                 }
             }
             
