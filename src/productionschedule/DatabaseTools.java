@@ -64,7 +64,11 @@ public class DatabaseTools {
                 System.out.println("Testing type");
                 for (int i = 1; i < values.size() + 1; i++) {
                     int objectType = 0;
-
+                    try {
+                        System.out.println(values.get(i - 1).getClass().getName());
+                    } catch (NullPointerException e) {
+                        System.out.println("Null");
+                    }
                     if (values.get(i - 1) == null) {
                         preparedStmtUpdate.setNull(i, objectType);
                     } else {
@@ -75,10 +79,19 @@ public class DatabaseTools {
                             case "java.util.Date":
                                 objectType = sqlDate;
                                 break;
+                            case "java.sql.Date":
+                                objectType = sqlDate;
+                                break;
                             case "int":
                                 objectType = sqlInt;
                                 break;
+                            case "java.lang.Integer":
+                                objectType = sqlInt;
+                                break;
                             case "double":
+                                objectType = sqlDouble;
+                                break;
+                            case "java.lang.Double":
                                 objectType = sqlDouble;
                                 break;
                             default:
@@ -102,7 +115,11 @@ public class DatabaseTools {
         }
         connection.close();
         rowSet.first();
-        return rowSet.getInt(1);
+        try {
+            return rowSet.getInt(1);
+        } catch (IndexOutOfBoundsException e) {
+            return 0;
+        }
     }
     ////////////////////////////////////////////////////////////////////////////
 

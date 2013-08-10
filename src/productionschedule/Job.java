@@ -56,6 +56,15 @@ public class Job {
         //jobNum = jobNum.getClass().getName();
         packages = buildPackageArray();
     }
+    Job(JobPackage jp) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException{
+        jobNum = jp.jobNum;
+        client = jp.client;
+        jobName = jp.jobName;
+        status = jp.status;
+        programmer = jp.programmer;
+        id = jp.id;
+        packages = buildPackageArray();
+    }
 
     private ArrayList buildPackageArray() throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException {
         System.out.println("BuildPackageArray started");

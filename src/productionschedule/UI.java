@@ -15,6 +15,8 @@ import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -24,6 +26,7 @@ import java.util.TooManyListenersException;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.DropMode;
@@ -71,6 +74,7 @@ public class UI extends javax.swing.JFrame {
     public static TableRowSorter bonnieSorter;
     public static TableRowSorter clydeSorter;
     public static TableRowSorter oceSorter;
+    public static Preferences prefs;
 
     //public static Job j = new Job(1, "A", "B", "C", "D", "E", 2);
     /**
@@ -79,6 +83,9 @@ public class UI extends javax.swing.JFrame {
     public UI() throws TooManyListenersException, ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException, MalformedURLException, NullPointerException, IOException {
         
         mySplash = SplashScreen.getSplashScreen();
+        
+        prefs = Preferences.userRoot().node(this.getClass().getName());
+        
         
         
         Dimension ssDim = mySplash.getSize();
@@ -179,22 +186,6 @@ public class UI extends javax.swing.JFrame {
         clydePool = new JTable(ctm);
         ocePool = new JTable(otm);
         
-//        ArrayList list = new ArrayList();
-//    	list.add( new RowSorter.SortKey(12, SortOrder.ASCENDING) );
-//        bonnieSorter = new TableRowSorter(btm);
-//        clydeSorter = new TableRowSorter(ctm);
-//        oceSorter = new TableRowSorter(otm);
-//        bonniePool.setAutoCreateRowSorter(true);
-//        bonniePool.setRowSorter(bonnieSorter);
-//        //bonnieSorter.toggleSortOrder(12);
-//        clydePool.setRowSorter(clydeSorter);
-//        //clydeSorter.toggleSortOrder(12);
-//        ocePool.setRowSorter(oceSorter);
-//        //oceSorter.toggleSortOrder(12);
-//        bonnieSorter.setSortKeys(list);
-//        bonnieSorter.sort();
-//        bonnieSorter.
-
         TableColumn tc = bonniePool.getColumnModel().getColumn(5);
         JComboBox cb = new JComboBox();
         cb.addItem("Queued");
@@ -204,8 +195,11 @@ public class UI extends javax.swing.JFrame {
 
         jobPoolTable.getSelectionModel().addListSelectionListener(new RowSelectedListener());
         jobPoolTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-
+        
+        TableFocusListener tfl = new TableFocusListener();
+        bonniePool.addFocusListener(tfl);
+        clydePool.addFocusListener(tfl);
+        ocePool.addFocusListener(tfl);
 
         jobPoolTable.setDragEnabled(false);
         jobPoolTable.setDropMode(DropMode.INSERT_ROWS);
@@ -266,8 +260,10 @@ public class UI extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        commitButton = new javax.swing.JButton();
         Test = new javax.swing.JButton();
+        jToolBar1 = new javax.swing.JToolBar();
+        unschedButton = new javax.swing.JButton();
+        commitButton = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         jPanel3 = new javax.swing.JPanel();
@@ -275,6 +271,9 @@ public class UI extends javax.swing.JFrame {
         jTable1 = new javax.swing.JTable();
         jButton1 = new javax.swing.JButton();
         testButton = new javax.swing.JButton();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -311,19 +310,39 @@ public class UI extends javax.swing.JFrame {
         jLabel5.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel5.setText("Packages");
 
-        commitButton.setText("Commit");
-        commitButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                commitButtonActionPerformed(evt);
-            }
-        });
-
         Test.setText("Test");
         Test.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 TestActionPerformed(evt);
             }
         });
+
+        jToolBar1.setRollover(true);
+
+        unschedButton.setText("UnSchudule");
+        unschedButton.setToolTipText("Clicking this button with a package in a printer pool selected will un-schedule the job and put it back into the package pool.");
+        unschedButton.setBorder(null);
+        unschedButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        unschedButton.setFocusable(false);
+        unschedButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        unschedButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        unschedButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                unschedButtonActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(unschedButton);
+
+        commitButton.setText("Commit");
+        commitButton.setFocusable(false);
+        commitButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        commitButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        commitButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                commitButtonActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(commitButton);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -354,14 +373,17 @@ public class UI extends javax.swing.JFrame {
                             .addComponent(refreshButton))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(Test)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(commitButton)))
+                        .addGap(73, 73, 73)))
                 .addContainerGap())
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 626, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(19, 19, 19)
+                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(jLabel5))
@@ -385,11 +407,9 @@ public class UI extends javax.swing.JFrame {
                 .addComponent(ocePane, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(Test, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(Test)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(refreshButton)
-                            .addComponent(commitButton))
+                        .addComponent(refreshButton)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -464,7 +484,7 @@ public class UI extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 954, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 966, Short.MAX_VALUE)
                 .addContainerGap())
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(44, 44, 44)
@@ -475,6 +495,21 @@ public class UI extends javax.swing.JFrame {
         );
 
         jTabbedPane1.addTab("tab2", jPanel2);
+
+        jMenu1.setText("File");
+
+        jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_P, java.awt.event.InputEvent.ALT_MASK));
+        jMenuItem1.setText("Preferences");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem1);
+
+        jMenuBar1.add(jMenu1);
+
+        setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -517,42 +552,7 @@ public class UI extends javax.swing.JFrame {
     }//GEN-LAST:event_refreshButtonActionPerformed
 
     private void commitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_commitButtonActionPerformed
-
-        //String jobQuery = "UPDATE main SET jobNum = ?, client = ?, jobName = ?, mailDate = ?, type = ?, jobStatus = ?, notes = ?, programmer = ?, signOffs = ?, approved = ?, production = ?, platform = ?, csr = ?, printer = ?, data = ? WHERE id = ?";
-
-        String jobQuery = "UPDATE jobs SET jobNum=?, client=?, jobName=?, programmer=? WHERE id=?";
-        String pkgQuery = "UPDATE packages SET pkgName =?, mailDate=?, status=?, size=?, nUp=?, printer=?, ert=?, queuePos=? WHERE id = ? AND pkgName = ?";  //Added pkg name due to the fact packages lack a unique identifier
-        ArrayList jobValues = new ArrayList();
-        ArrayList pkgValues = new ArrayList();
-
-            ArrayList <JTable>tables = new ArrayList();
-            tables.add(bonniePool);
-            tables.add(clydePool);
-            tables.add(ocePool);
-        for (JTable jt : tables) {
-            PrinterTableModel ptm = (PrinterTableModel) jt.getModel();
-            try {
-                for (int i = 0; i < ptm.getRowCount(); i++) {
-
-                    JobPackage jp = (JobPackage) ptm.dataVector.elementAt(i);
-                    jobValues.add(ProductionSchedule.exportHandler(jp)[0]);
-                    pkgValues.add(ProductionSchedule.exportHandler(jp)[1]);
-                }
-                System.out.println("Job Values:\n");
-                for (int i = 0; i < jobValues.size(); i++) {
-                    System.out.println(jobValues.get(i));
-                }
-                System.out.println("Pkg Values:\n");
-                for (int i = 0; i < pkgValues.size(); i++) {
-                    System.out.println(pkgValues.get(i));
-                }
-                DatabaseTools.multiUpdateDatabase(dbo, pkgQuery, pkgValues);
-                DatabaseTools.multiUpdateDatabase(dbo, jobQuery, jobValues);
-            } catch (SQLException | ClassNotFoundException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException ex) {
-                Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
+        ProductionSchedule.commitTables();
     }//GEN-LAST:event_commitButtonActionPerformed
 
     private void TestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TestActionPerformed
@@ -580,6 +580,116 @@ public class UI extends javax.swing.JFrame {
 
 
     }//GEN-LAST:event_TestActionPerformed
+
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        String[] args = null;
+        PrefWindow.main(args);
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void unschedButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unschedButtonActionPerformed
+        ArrayList<JobPackage> removalList = new ArrayList<>();
+        boolean jobNotInPool = true;
+        ArrayList jobsToAdd = new ArrayList();
+        JobTableModel jtm = (JobTableModel)jobPoolTable.getModel();
+        if(bonniePool.isFocusOwner()){
+            System.out.println("Bonnie Has Focus");
+            int rowsSelected[] = bonniePool.getSelectedRows();
+            PrinterTableModel tempModel = (PrinterTableModel)bonniePool.getModel();
+            for (int i = 0; i < rowsSelected.length; i++) {
+                JobPackage jp = (JobPackage)tempModel.dataVector.get(rowsSelected[i]);
+                removalList.add((JobPackage)tempModel.dataVector.get(rowsSelected[i]));
+                for (int j = 0; j < jtm.getRowCount(); j++) {
+                    Job job = (Job)jtm.dataVector.get(j);
+                    System.out.println("Checking if " + jp.id + " is equal to " + job.id);
+                    if(jp.id == job.id){
+                        System.out.println("Job In Job Pool");
+                        jobNotInPool = false;
+                    }
+                }
+                if(jobNotInPool){
+                    try {
+                        jobsToAdd.add(new Job(jp));
+                    } catch ( ClassNotFoundException | SQLException | IllegalArgumentException | IllegalAccessException ex) {
+                        Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                tempModel.removeRow(bonniePool.getSelectedRow() + i);
+            }
+            for (int i = 0; i < jobsToAdd.size(); i++) {
+                if(jobNotInPool){
+                    System.out.println("Adding to model");
+                    jtm.insertRow(0, jobsToAdd.get(i));
+                }
+            }
+        }
+        else if(clydePool.isFocusOwner()){
+            System.out.println("Clyde Has Focus");
+            int rowsSelected[] = clydePool.getSelectedRows();
+            PrinterTableModel tempModel = (PrinterTableModel)clydePool.getModel();
+            for (int i = 0; i < rowsSelected.length; i++) {
+                JobPackage jp = (JobPackage)tempModel.dataVector.get(rowsSelected[i]);
+                removalList.add((JobPackage)tempModel.dataVector.get(rowsSelected[i]));
+                for (int j = 0; j < jtm.getRowCount(); j++) {
+                    Job job = (Job)jtm.dataVector.get(j);
+                    System.out.println("Checking if " + jp.id + " is equal to " + job.id);
+                    if(jp.id == job.id){
+                        System.out.println("Job In Job Pool");
+                        jobNotInPool = false;
+                    }
+                }
+                if(jobNotInPool){
+                    try {
+                        jobsToAdd.add(new Job(jp));
+                    } catch ( ClassNotFoundException | SQLException | IllegalArgumentException | IllegalAccessException ex) {
+                        Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                tempModel.removeRow(clydePool.getSelectedRow() + i);
+            }
+            for (int i = 0; i < jobsToAdd.size(); i++) {
+                if(jobNotInPool){
+                    System.out.println("Adding to model");
+                    jtm.insertRow(0, jobsToAdd.get(i));
+                }
+            }
+        }
+        else if (ocePool.isFocusOwner()){
+            System.out.println("Oce Has Focus");
+            int rowsSelected[] = ocePool.getSelectedRows();
+            PrinterTableModel tempModel = (PrinterTableModel)ocePool.getModel();
+            for (int i = 0; i < rowsSelected.length; i++) {
+                JobPackage jp = (JobPackage)tempModel.dataVector.get(rowsSelected[i]);
+                removalList.add((JobPackage)tempModel.dataVector.get(rowsSelected[i]));
+                for (int j = 0; j < jtm.getRowCount(); j++) {
+                    Job job = (Job)jtm.dataVector.get(j);
+                    System.out.println("Checking if " + jp.id + " is equal to " + job.id);
+                    if(jp.id == job.id){
+                        System.out.println("Job In Job Pool");
+                        jobNotInPool = false;
+                    }
+                }
+                if(jobNotInPool){
+                    try {
+                        jobsToAdd.add(new Job(jp));
+                    } catch ( ClassNotFoundException | SQLException | IllegalArgumentException | IllegalAccessException ex) {
+                        Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                tempModel.removeRow(ocePool.getSelectedRow() + i);
+            }
+            for (int i = 0; i < jobsToAdd.size(); i++) {
+                if(jobNotInPool){
+                    System.out.println("Adding to model");
+                    jtm.insertRow(0, jobsToAdd.get(i));
+                }
+            }
+        }
+        try {
+            ProductionSchedule.unsched(removalList);
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException | SQLException ex) {
+            Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_unschedButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -634,6 +744,9 @@ public class UI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -642,11 +755,13 @@ public class UI extends javax.swing.JFrame {
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTable jTable1;
+    private javax.swing.JToolBar jToolBar1;
     private javax.swing.JScrollPane jobPoolPane;
     private javax.swing.JScrollPane ocePane;
     private javax.swing.JScrollPane pkgPoolPane;
     private javax.swing.JButton refreshButton;
     private javax.swing.JButton testButton;
+    private javax.swing.JButton unschedButton;
     // End of variables declaration//GEN-END:variables
 
     public static void errorWindow(String errorMessage) {
@@ -691,6 +806,21 @@ public class UI extends javax.swing.JFrame {
             System.out.println("Drop");
         }
     }
+    
+    class TableFocusListener implements FocusListener{
+
+        @Override
+        public void focusGained(FocusEvent e) {
+            
+        }
+
+        @Override
+        public void focusLost(FocusEvent e) {
+            JTable tempTable = (JTable)e.getSource();
+            tempTable.clearSelection();
+        }
+        
+    }
 
     class RowSelectedListener implements ListSelectionListener {
 
@@ -715,7 +845,7 @@ public class UI extends javax.swing.JFrame {
                             break;
                         }
                     }
-                } catch (NullPointerException ex) {
+                } catch (NullPointerException | IndexOutOfBoundsException  ex) {
                 }
                 try {                
                     for (int j = 0; j < ctm.getRowCount(); j++) {
@@ -725,7 +855,7 @@ public class UI extends javax.swing.JFrame {
                             break;
                         }
                     }
-                } catch (NullPointerException ex) {
+                } catch (NullPointerException | IndexOutOfBoundsException  ex) {
                 }
                 try {                
                     for (int j = 0; j < otm.getRowCount(); j++) {
@@ -735,7 +865,7 @@ public class UI extends javax.swing.JFrame {
                             break;
                         }
                     }
-                } catch (NullPointerException ex) {
+                } catch (NullPointerException | IndexOutOfBoundsException  ex) {
                 }
                 
                 try {
@@ -788,6 +918,9 @@ public class UI extends javax.swing.JFrame {
                         ptm.setValueAt(s, i, 12);
                     }
                     break;
+            }
+            if(prefs.getBoolean("AutoCommit", false)){
+                ProductionSchedule.commitTables();
             }
         }
     }

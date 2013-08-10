@@ -23,6 +23,7 @@ import java.nio.file.LinkOption;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JTable;
 
 /**
  *
@@ -219,7 +220,6 @@ public class ProductionSchedule {
     ////////////////////////////////////////////////////////////////////////////
 
     public static ArrayList importHandler(DatabaseOutputObject exDBOO) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException {
-        // TODO add packages to importHandler
         double d = 100.0;
         double e = (double)exDBOO.rowSet.size();
         int increment = (int)Math.ceil(d/e);
@@ -249,7 +249,6 @@ public class ProductionSchedule {
     ////////////////////////////////////////////////////////////////////////////
 
     public static ArrayList pkgImportHandler(DatabaseOutputObject exDBOO, Class c) throws ClassNotFoundException, SQLException, IllegalArgumentException, IllegalAccessException {
-        // TODO add packages to importHandler
         ArrayList pkgs = new ArrayList();
         while (exDBOO.rowSet.next()) {
             Field fieldlist[] = c.getFields();
@@ -274,12 +273,50 @@ public class ProductionSchedule {
         CsvReader newReader = new CsvReader("C:\\LASER\\csv Reports\\65268 Laser Production Count Sheet.csv");
         csvToJob(f);
     }
+    ////////////////////////////////////////////////////////////////////////////
+    public static void unsched(ArrayList<JobPackage> p) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, SQLException{
+        for (int i = 0; i < p.size(); i++) {
+            p.get(i).queuePos = null;
+            ArrayList[] al = exportHandler(p.get(i));
+            String pkgQuery = "UPDATE packages SET pkgName =?, mailDate=?, status=?, size=?, nUp=?, printer=?, ert=?, queuePos=? WHERE id = ? AND pkgName = ?";  //Added pkg name due to the fact packages lack a unique identifier
+            DatabaseTools.updateDatabase(dbo, pkgQuery, al[1]);
+        }
+        
+    }    
+    ////////////////////////////////////////////////////////////////////////////
+    public static void commitTables() {
+        String jobQuery = "UPDATE jobs SET jobNum=?, client=?, jobName=?, programmer=? WHERE id=?";
+        String pkgQuery = "UPDATE packages SET pkgName =?, mailDate=?, status=?, size=?, nUp=?, printer=?, ert=?, queuePos=? WHERE id = ? AND pkgName = ?";  //Added pkg name due to the fact packages lack a unique identifier
+        ArrayList jobValues = new ArrayList();
+        ArrayList pkgValues = new ArrayList();
+        ArrayList <JTable>tables = new ArrayList();
+        tables.add(UI.bonniePool);
+        tables.add(UI.clydePool);
+        tables.add(UI.ocePool);
+        for (JTable jt : tables) {
+            PrinterTableModel ptm = (PrinterTableModel) jt.getModel();
+            try {
+                for (int i = 0; i < ptm.getRowCount(); i++) {
 
-    public static ArrayList pkgToSql() {
-        return null;
+                    JobPackage jp = (JobPackage) ptm.dataVector.elementAt(i);
+                    jobValues.add(ProductionSchedule.exportHandler(jp)[0]);
+                    pkgValues.add(ProductionSchedule.exportHandler(jp)[1]);
+                }
+                System.out.println("Job Values:\n");
+                for (int i = 0; i < jobValues.size(); i++) {
+                    System.out.println(jobValues.get(i));
+                }
+                System.out.println("Pkg Values:\n");
+                for (int i = 0; i < pkgValues.size(); i++) {
+                    System.out.println(pkgValues.get(i));
+                }
+                DatabaseTools.multiUpdateDatabase(dbo, pkgQuery, pkgValues);
+                DatabaseTools.multiUpdateDatabase(dbo, jobQuery, jobValues);
+            } catch (SQLException | ClassNotFoundException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException ex) {
+                Logger.getLogger(UI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
-
-
     ////////////////////////////////////////////////////////////////////////////
 //    public static JTable buildJobTable(ArrayList jobs){
 //        for (int curJob = 0; curJob < jobs.size(); curJob++) {
